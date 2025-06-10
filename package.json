@@ -48,10 +48,12 @@
   },
   "type": "module",
   "dependencies": {
+    "@ai-sdk/google-vertex": "^2.2.24",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/auth-ui-svelte": "^0.2.9",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.50.0",
+    "ai": "^4.3.16",
     "handlebars": "^4.7.8",
     "resend": "^4.5.2",
     "stripe": "^13.3.0"

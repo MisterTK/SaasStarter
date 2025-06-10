@@ -121,3 +121,34 @@ PRIVATE_ADMIN_EMAIL           # Optional - admin notifications
 - Use Stripe test mode keys in development
 - Test card: 4242 4242 4242 4242
 - Webhook testing requires Stripe CLI or live deployment
+
+## Google Vertex AI Integration
+
+This project includes integration with Google Vertex AI for automated review response generation using the Vercel AI SDK.
+
+### Setup
+
+1. Set environment variables:
+   ```
+   GOOGLE_CLOUD_PROJECT=your-project-id
+   GOOGLE_CLOUD_LOCATION=us-central1  # optional
+   GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json  # optional for local dev
+   ```
+
+2. Enable Vertex AI API in your GCP project
+
+3. Configure authentication (see docs/vertex-ai-integration.md)
+
+### API Endpoints
+
+- `POST /account/api/reviews/generate` - Generate AI responses to reviews
+  - Supports both streaming and non-streaming responses
+  - Requires authentication
+
+### Key Files
+
+- `/src/lib/services/ai/` - AI service implementations
+- `/src/lib/config/gemini-models.json` - Model configuration (update this when new models are released)
+- `/src/routes/(admin)/api/reviews/generate/` - API endpoint
+- `/src/lib/components/ReviewResponseGenerator.svelte` - Demo component
+- `/src/routes/(admin)/account/ai-demo/` - Demo page

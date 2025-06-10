@@ -90,6 +90,10 @@ Want to learn why we picked the technologies we did, and how to keep your fork l
   - ESLint (v9.28.0) with flat config
   - Prettier (v3.5.3)
   - Vitest (v3.2.3)
+- AI Integration
+  - Vercel AI SDK
+  - Google Vertex AI (Gemini models)
+  - Edge runtime compatible
 - Suggested Hosting Stack
   - Host + CDN: Cloudflare Pages
   - Serverless compute: Cloudflare Workers
@@ -299,6 +303,21 @@ If you prefer another host you can explore alternatives:
 SaaS Starter includes email capabilities for sending emails to users and admins.
 
 These are optional and disabled by default. See [email docs](email_docs.md) for details on how to enable and customize them.
+
+## Setup Google Vertex AI -- Optional
+
+This template includes Google Vertex AI integration for AI-powered features. To enable:
+
+1. Set up Google Cloud Project with Vertex AI API enabled
+2. Configure authentication (service account or ADC)
+3. Add environment variables:
+   ```
+   GOOGLE_CLOUD_PROJECT=your-project-id
+   GOOGLE_CLOUD_LOCATION=us-central1
+   ```
+4. Update model configuration in `/src/lib/config/gemini-models.json`
+
+See [Vertex AI integration docs](docs/vertex-ai-integration.md) for detailed setup instructions.
 
 ## Add Your Content
 
