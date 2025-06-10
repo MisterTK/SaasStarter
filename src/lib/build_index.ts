@@ -1,6 +1,6 @@
 import path from "path"
 import fs from "fs"
-import { glob } from "glob"
+import { globSync } from "glob"
 import { convert } from "html-to-text"
 import JSDOM from "jsdom"
 import Fuse from "fuse.js"
@@ -14,7 +14,7 @@ export async function buildSearchIndex() {
   const fileRoot = path.resolve(".")
   const pagesPath = path.join(fileRoot, ".svelte-kit/output/prerendered/pages")
 
-  const allFiles = glob.sync(path.join(pagesPath, "**/*.html"))
+  const allFiles = globSync(path.join(pagesPath, "**/*.html"))
   for (const file of allFiles) {
     try {
       const webPath = file

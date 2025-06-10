@@ -81,10 +81,15 @@ Want to learn why we picked the technologies we did, and how to keep your fork l
 
 ## Tech Stack
 
-- Web Framework: SvelteKit
+- Web Framework: SvelteKit (v2.21.4)
 - CSS / Styling
-  - Framework: TailwindCSS
-  - Component library: DaisyUI
+  - Framework: TailwindCSS (v4.1.8)
+  - Component library: DaisyUI (v5.0.43)
+- Development Tools
+  - TypeScript (v5.8.3)
+  - ESLint (v9.28.0) with flat config
+  - Prettier (v3.5.3)
+  - Vitest (v3.2.3)
 - Suggested Hosting Stack
   - Host + CDN: Cloudflare Pages
   - Serverless compute: Cloudflare Workers

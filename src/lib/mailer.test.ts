@@ -27,7 +27,6 @@ describe("mailer", () => {
     vi.clearAllMocks()
     const { env } = await import("$env/dynamic/private")
     env.PRIVATE_RESEND_API_KEY = "mock_resend_api_key"
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(createClient as any).mockReturnValue(mockSupabaseClient)
 
     vi.mocked(Resend).mockImplementation(
