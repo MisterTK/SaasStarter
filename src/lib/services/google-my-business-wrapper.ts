@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { GoogleMyBusinessService, type GoogleToken } from './google-my-business';
+import { GoogleMyBusinessServiceAlt } from './GoogleMyBusinessServiceAlt';
 
 const GOOGLE_OAUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -211,6 +212,26 @@ export class GoogleMyBusinessWrapper {
 
     // Create service with token refresh callback
     return new GoogleMyBusinessService(
+      tokens.access_token,
+      tokens.refresh_token,
+      async (newTokens) => {
+        await this.updateAccessToken(organizationId, newTokens.access_token, newTokens.expires_at);
+      },
+      {
+        clientId: this.config?.clientId || '',
+        clientSecret: this.config?.clientSecret || ''
+      }
+    );
+  }
+
+  async createAlternativeService(organizationId: string): Promise<GoogleMyBusinessServiceAlt | null> {
+    const tokens = await this.getTokens(organizationId);
+    if (!tokens) {
+      return null;
+    }
+
+    // Create alternative service that uses node-fetch with token refresh callback
+    return new GoogleMyBusinessServiceAlt(
       tokens.access_token,
       tokens.refresh_token,
       async (newTokens) => {

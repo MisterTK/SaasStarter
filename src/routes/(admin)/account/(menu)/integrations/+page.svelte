@@ -18,6 +18,114 @@
 
 <h1 class="text-2xl font-bold mb-6">Integrations</h1>
 
+{#if data.debugInfo}
+  <div class="mb-6 p-4 bg-base-200 rounded-lg">
+    <h2 class="text-lg font-semibold mb-4">Debug Mode: Service Comparison</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Regular Service -->
+      <div class="card bg-base-100">
+        <div class="card-body">
+          <h3 class="card-title text-base">Regular Service (googleapis)</h3>
+          
+          <div class="space-y-2">
+            <div>
+              <span class="font-medium">Accounts:</span>
+              {#if data.debugInfo.regularService.accounts.success}
+                <span class="badge badge-success badge-sm ml-2">Success</span>
+                <div class="text-sm mt-1">
+                  Found {data.debugInfo.regularService.accounts.data?.length || 0} accounts
+                </div>
+              {:else}
+                <span class="badge badge-error badge-sm ml-2">Failed</span>
+                <div class="text-sm text-error mt-1">{data.debugInfo.regularService.accounts.error}</div>
+              {/if}
+            </div>
+            
+            <div>
+              <span class="font-medium">Locations:</span>
+              {#if data.debugInfo.regularService.locations.success}
+                <span class="badge badge-success badge-sm ml-2">Success</span>
+                <div class="text-sm mt-1">
+                  Found {data.debugInfo.regularService.locations.data?.length || 0} locations
+                </div>
+              {:else}
+                <span class="badge badge-error badge-sm ml-2">Failed</span>
+                <div class="text-sm text-error mt-1">{data.debugInfo.regularService.locations.error}</div>
+              {/if}
+            </div>
+            
+            <div>
+              <span class="font-medium">Invitations:</span>
+              {#if data.debugInfo.regularService.invitations.success}
+                <span class="badge badge-success badge-sm ml-2">Success</span>
+                <div class="text-sm mt-1">
+                  Found {data.debugInfo.regularService.invitations.data?.length || 0} invitations
+                </div>
+              {:else}
+                <span class="badge badge-error badge-sm ml-2">Failed</span>
+                <div class="text-sm text-error mt-1">{data.debugInfo.regularService.invitations.error}</div>
+              {/if}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Alternative Service -->
+      <div class="card bg-base-100">
+        <div class="card-body">
+          <h3 class="card-title text-base">Alternative Service (node-fetch)</h3>
+          
+          <div class="space-y-2">
+            <div>
+              <span class="font-medium">Accounts:</span>
+              {#if data.debugInfo.altService.accounts.success}
+                <span class="badge badge-success badge-sm ml-2">Success</span>
+                <div class="text-sm mt-1">
+                  Found {data.debugInfo.altService.accounts.data?.length || 0} accounts
+                </div>
+              {:else}
+                <span class="badge badge-error badge-sm ml-2">Failed</span>
+                <div class="text-sm text-error mt-1">{data.debugInfo.altService.accounts.error}</div>
+              {/if}
+            </div>
+            
+            <div>
+              <span class="font-medium">Locations:</span>
+              {#if data.debugInfo.altService.locations.success}
+                <span class="badge badge-success badge-sm ml-2">Success</span>
+                <div class="text-sm mt-1">
+                  Found {data.debugInfo.altService.locations.data?.length || 0} locations
+                </div>
+              {:else}
+                <span class="badge badge-error badge-sm ml-2">Failed</span>
+                <div class="text-sm text-error mt-1">{data.debugInfo.altService.locations.error}</div>
+              {/if}
+            </div>
+            
+            <div>
+              <span class="font-medium">Invitations:</span>
+              {#if data.debugInfo.altService.invitations.success}
+                <span class="badge badge-success badge-sm ml-2">Success</span>
+                <div class="text-sm mt-1">
+                  Found {data.debugInfo.altService.invitations.data?.length || 0} invitations
+                </div>
+              {:else}
+                <span class="badge badge-error badge-sm ml-2">Failed</span>
+                <div class="text-sm text-error mt-1">{data.debugInfo.altService.invitations.error}</div>
+              {/if}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-4 text-sm text-gray-600">
+      <p>Debug mode activated. Remove <code class="bg-base-300 px-1 rounded">?debug=true</code> from the URL to see normal view.</p>
+    </div>
+  </div>
+{/if}
+
 {#if data.success}
   <div class="alert alert-success mb-6">
     <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>

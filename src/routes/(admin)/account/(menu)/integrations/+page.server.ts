@@ -97,8 +97,133 @@ export const load: PageServerLoad = async ({
   let businessAccounts = null
   let accessibleLocations = null
   let invitations = null
+  let debugInfo = null
   
-  if (tokenValid) {
+  // Debug mode to test both services
+  if (url.searchParams.get("debug") === "true" && tokenValid) {
+    const { GoogleMyBusinessServiceAlt } = await import("$lib/services/GoogleMyBusinessServiceAlt")
+    
+    debugInfo = {
+      regularService: {
+        accounts: { success: false, data: null, error: null },
+        locations: { success: false, data: null, error: null },
+        invitations: { success: false, data: null, error: null }
+      },
+      altService: {
+        accounts: { success: false, data: null, error: null },
+        locations: { success: false, data: null, error: null },
+        invitations: { success: false, data: null, error: null }
+      }
+    }
+    
+    // Test regular service
+    try {
+      const accounts = await gmb.listAccounts(orgId)
+      debugInfo.regularService.accounts = { success: true, data: accounts, error: null }
+    } catch (err) {
+      debugInfo.regularService.accounts = { 
+        success: false, 
+        data: null, 
+        error: err instanceof Error ? err.message : String(err) 
+      }
+    }
+    
+    try {
+      const locations = await gmb.getAllAccessibleLocations(orgId)
+      debugInfo.regularService.locations = { success: true, data: locations, error: null }
+    } catch (err) {
+      debugInfo.regularService.locations = { 
+        success: false, 
+        data: null, 
+        error: err instanceof Error ? err.message : String(err) 
+      }
+    }
+    
+    try {
+      const invites = await gmb.getInvitations(orgId)
+      debugInfo.regularService.invitations = { success: true, data: invites, error: null }
+    } catch (err) {
+      debugInfo.regularService.invitations = { 
+        success: false, 
+        data: null, 
+        error: err instanceof Error ? err.message : String(err) 
+      }
+    }
+    
+    // Test alternative service with node-fetch
+    try {
+      // Get the token to use with alt service
+      const { data: tokenData } = await supabaseServiceRole
+        .from("google_tokens")
+        .select("encrypted_access_token, encrypted_refresh_token")
+        .eq("organization_id", orgId)
+        .single()
+      
+      if (tokenData) {
+        const { decrypt } = await import("$lib/services/google-my-business")
+        const accessToken = decrypt(tokenData.encrypted_access_token, privateEnv.TOKEN_ENCRYPTION_KEY)
+        const refreshToken = decrypt(tokenData.encrypted_refresh_token, privateEnv.TOKEN_ENCRYPTION_KEY)
+        
+        const altService = new GoogleMyBusinessServiceAlt(
+          accessToken,
+          refreshToken,
+          async (tokens) => {
+            // Token refresh callback
+            const { encrypt } = await import("$lib/services/google-my-business")
+            await supabaseServiceRole
+              .from("google_tokens")
+              .update({
+                encrypted_access_token: encrypt(tokens.access_token, privateEnv.TOKEN_ENCRYPTION_KEY),
+                expires_at: tokens.expires_at
+              })
+              .eq("organization_id", orgId)
+          },
+          {
+            clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
+            clientSecret: privateEnv.GOOGLE_CLIENT_SECRET
+          }
+        )
+        
+        // Test alt service methods
+        try {
+          const accounts = await altService.getAccounts()
+          debugInfo.altService.accounts = { success: true, data: accounts, error: null }
+        } catch (err) {
+          debugInfo.altService.accounts = { 
+            success: false, 
+            data: null, 
+            error: err instanceof Error ? err.message : String(err) 
+          }
+        }
+        
+        try {
+          const locations = await altService.getAllAccessibleLocations()
+          debugInfo.altService.locations = { success: true, data: locations, error: null }
+        } catch (err) {
+          debugInfo.altService.locations = { 
+            success: false, 
+            data: null, 
+            error: err instanceof Error ? err.message : String(err) 
+          }
+        }
+        
+        try {
+          const invites = await altService.getInvitations()
+          debugInfo.altService.invitations = { success: true, data: invites, error: null }
+        } catch (err) {
+          debugInfo.altService.invitations = { 
+            success: false, 
+            data: null, 
+            error: err instanceof Error ? err.message : String(err) 
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error testing alt service:", err)
+    }
+  }
+  
+  if (tokenValid && !debugInfo) {
     try {
       // Fetch actual business accounts from Google My Business API
       businessAccounts = await gmb.listAccounts(orgId)
@@ -118,7 +243,8 @@ export const load: PageServerLoad = async ({
     accessibleLocations,
     invitations,
     success: url.searchParams.get("success") === "true",
-    successType: url.searchParams.get("success") // This will be "true" or "invitation-accepted"
+    successType: url.searchParams.get("success"), // This will be "true" or "invitation-accepted"
+    debugInfo
   }
 }
 
