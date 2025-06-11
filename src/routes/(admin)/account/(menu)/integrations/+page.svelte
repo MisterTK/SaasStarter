@@ -3,6 +3,7 @@
   import type { Writable } from "svelte/store"
   import type { PageData } from "./$types"
   import { enhance } from "$app/forms"
+  import { goto } from "$app/navigation"
 
   let { data }: { data: PageData } = $props()
   let adminSection: Writable<string> = getContext("adminSection")
@@ -200,9 +201,17 @@
                     action="?/importReviews"
                     use:enhance={() => {
                       importingLocation = location.name
-                      return async ({ update }) => {
-                        await update()
-                        importingLocation = null
+                      return async ({ result, update }) => {
+                        if (result.type === 'redirect') {
+                          // Handle redirect manually to prevent form resubmission
+                          await update({ reset: false })
+                          importingLocation = null
+                          // Use goto for client-side navigation
+                          goto(result.location)
+                        } else {
+                          await update()
+                          importingLocation = null
+                        }
                       }
                     }}
                   >

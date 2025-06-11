@@ -291,8 +291,13 @@ export const actions: Actions = {
         }
       }
 
+      // Use 303 See Other to prevent form resubmission
       redirect(303, `/account/reviews?imported=${importedCount}`)
     } catch (error) {
+      // Re-throw redirects (they're not errors)
+      if (error && typeof error === 'object' && 'status' in error && 'location' in error) {
+        throw error
+      }
       console.error("Error importing reviews:", error)
       return fail(500, { error: "Failed to import reviews" })
     }
