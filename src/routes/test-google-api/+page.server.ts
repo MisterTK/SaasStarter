@@ -82,7 +82,7 @@ export const actions: Actions = {
 			} catch (err) {
 				results.push({
 					test: 'Direct URL Construction',
-					error: err.message,
+					error: err instanceof Error ? err.message : String(err),
 					success: false
 				});
 			}
@@ -104,11 +104,11 @@ export const actions: Actions = {
 					status: response.status,
 					success: true
 				});
-			} catch (err) {
+			} catch (err: any) {
 				results.push({
 					test: 'Google APIs Library',
-					error: err.message,
-					stack: err.stack,
+					error: err instanceof Error ? err.message : String(err),
+					stack: err instanceof Error ? err.stack : undefined,
 					response: err.response?.data,
 					status: err.response?.status,
 					success: false
@@ -138,8 +138,8 @@ export const actions: Actions = {
 			} catch (err) {
 				results.push({
 					test: 'Direct Fetch',
-					error: err.message,
-					stack: err.stack,
+					error: err instanceof Error ? err.message : String(err),
+					stack: err instanceof Error ? err.stack : undefined,
 					success: false
 				});
 			}

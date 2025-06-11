@@ -97,7 +97,18 @@ export const load: PageServerLoad = async ({
   let businessAccounts = null
   let accessibleLocations = null
   let invitations = null
-  let debugInfo = null
+  let debugInfo: {
+    regularService: {
+      accounts: { success: boolean; data: any; error: string | null };
+      locations: { success: boolean; data: any; error: string | null };
+      invitations: { success: boolean; data: any; error: string | null };
+    };
+    altService: {
+      accounts: { success: boolean; data: any; error: string | null };
+      locations: { success: boolean; data: any; error: string | null };
+      invitations: { success: boolean; data: any; error: string | null };
+    };
+  } | null = null
   
   // Debug mode to test both services
   if (url.searchParams.get("debug") === "true" && tokenValid) {
@@ -155,25 +166,25 @@ export const load: PageServerLoad = async ({
       // Get the token to use with alt service
       const { data: tokenData } = await supabaseServiceRole
         .from("google_tokens")
-        .select("encrypted_access_token, encrypted_refresh_token")
+        .select("access_token, refresh_token")
         .eq("organization_id", orgId)
         .single()
       
       if (tokenData) {
-        const { decrypt } = await import("$lib/services/google-my-business")
-        const accessToken = decrypt(tokenData.encrypted_access_token, privateEnv.TOKEN_ENCRYPTION_KEY)
-        const refreshToken = decrypt(tokenData.encrypted_refresh_token, privateEnv.TOKEN_ENCRYPTION_KEY)
+        // Import decrypt function from the wrapper since it's not exported from google-my-business
+        const accessToken = gmb['decrypt'](tokenData.access_token)
+        const refreshToken = gmb['decrypt'](tokenData.refresh_token)
         
         const altService = new GoogleMyBusinessServiceAlt(
           accessToken,
           refreshToken,
           async (tokens) => {
             // Token refresh callback
-            const { encrypt } = await import("$lib/services/google-my-business")
+            const encryptedAccessToken = gmb['encrypt'](tokens.access_token)
             await supabaseServiceRole
               .from("google_tokens")
               .update({
-                encrypted_access_token: encrypt(tokens.access_token, privateEnv.TOKEN_ENCRYPTION_KEY),
+                access_token: encryptedAccessToken,
                 expires_at: tokens.expires_at
               })
               .eq("organization_id", orgId)

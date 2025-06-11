@@ -198,19 +198,39 @@ export class GoogleMyBusinessServiceAlt {
   }
 
   async getInvitations(): Promise<Invitation[]> {
-    // Note: The invitations endpoint doesn't require an account ID
-    // It returns all invitations for the authenticated user
-    const response = await this.makeRequest(
-      `${GOOGLE_MY_BUSINESS_ACCOUNT_MANAGEMENT_API}/invitations`,
-    )
+    // The invitations endpoint requires listing through each account
+    // We need to get all accounts first, then check invitations for each
+    const allInvitations: Invitation[] = []
+    
+    try {
+      const accounts = await this.getAccounts()
+      
+      for (const account of accounts) {
+        try {
+          const accountName = account.name || `accounts/${account.accountId}`
+          const response = await this.makeRequest(
+            `${GOOGLE_MY_BUSINESS_ACCOUNT_MANAGEMENT_API}/${accountName}/invitations`,
+          )
 
-    if (!response.ok) {
-      console.error("Failed to fetch invitations:", await response.text())
+          if (response.ok) {
+            const data = await response.json() as { invitations?: Invitation[] }
+            if (data.invitations) {
+              allInvitations.push(...data.invitations)
+            }
+          } else {
+            // Log but don't fail completely if one account fails
+            console.error(`Failed to fetch invitations for account ${accountName}:`, await response.text())
+          }
+        } catch (err) {
+          console.error(`Error fetching invitations for account ${account.name}:`, err)
+        }
+      }
+      
+      return allInvitations
+    } catch (error) {
+      console.error("Failed to fetch accounts for invitations:", error)
       return []
     }
-
-    const data = await response.json() as { invitations?: Invitation[] }
-    return data.invitations || []
   }
 
   async acceptInvitation(invitationName: string): Promise<boolean> {
