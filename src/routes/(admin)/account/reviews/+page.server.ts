@@ -1,7 +1,40 @@
 import { redirect } from "@sveltejs/kit"
 import type { PageServerLoad } from "./$types"
 
-const GOOGLE_MY_BUSINESS_API = "https://mybusiness.googleapis.com/v4"
+interface Review {
+  reviewId: string
+  reviewer: {
+    displayName: string
+    profilePhotoUrl?: string | null
+  }
+  starRating: string
+  comment?: string
+  createTime: string
+  updateTime: string
+  reviewReply?: {
+    comment: string
+    updateTime: string
+  } | null
+  locationName: string
+}
+
+interface Location {
+  name: string
+  locationId: string
+  address: string
+  primaryPhone?: string
+  websiteUrl?: string
+}
+
+interface Account {
+  name: string
+  accountId: string
+  type?: string
+  role?: string
+  state?: string
+  profilePhotoUrl?: string
+  locations?: Location[]
+}
 
 export const load: PageServerLoad = async ({
   locals: { safeGetSession, supabaseServiceRole },
@@ -108,8 +141,8 @@ export const load: PageServerLoad = async ({
   try {
     // Fetch real data from Google My Business
     const accounts = await gmb.getAccounts()
-    let allReviews: any[] = []
-    let accountsWithLocations: any[] = []
+    let allReviews: Review[] = []
+    const accountsWithLocations: Account[] = []
 
     // For each account, fetch locations and reviews
     for (const account of accounts) {

@@ -199,7 +199,7 @@
         <div class="stat-title">Average Rating</div>
         <div class="stat-value">{stats.avgRating}</div>
         <div class="rating rating-sm">
-          {#each Array(5) as _, i}
+          {#each [...Array(5).keys()] as i (i)}
             <input
               type="radio"
               class="mask mask-star-2 bg-orange-400"
@@ -221,7 +221,7 @@
           >
             <option value="all">All Locations</option>
             {#each data.accounts as account}
-              {#each account.locations as location}
+              {#each (account.locations || []) as location}
                 <option value={location.name}>{location.name}</option>
               {/each}
             {/each}
@@ -278,7 +278,7 @@
                   <div class="flex items-center gap-2 mb-1">
                     <h3 class="font-semibold">{review.reviewer.displayName}</h3>
                     <div class="rating rating-sm">
-                      {#each Array(5) as _, i}
+                      {#each [...Array(5).keys()] as i (i)}
                         <input
                           type="radio"
                           class="mask mask-star-2 bg-orange-400"

@@ -3,7 +3,7 @@ import type { PageServerLoad, Actions } from "./$types"
 
 export const load: PageServerLoad = async ({
   params,
-  locals: { safeGetSession, supabaseServiceRole },
+  locals: { safeGetSession },
   cookies,
   url,
 }) => {
@@ -41,12 +41,7 @@ export const load: PageServerLoad = async ({
 }
 
 export const actions: Actions = {
-  reply: async ({
-    request,
-    params,
-    locals: { safeGetSession, supabaseServiceRole },
-    cookies,
-  }) => {
+  reply: async ({ request, params, locals: { safeGetSession }, cookies }) => {
     const { user } = await safeGetSession()
     if (!user) {
       return fail(401, { error: "Unauthorized" })

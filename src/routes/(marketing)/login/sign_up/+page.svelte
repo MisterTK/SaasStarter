@@ -6,10 +6,13 @@
 </script>
 
 <svelte:head>
-  <title>Sign up</title>
+  <title>Sign up - ReviewAI Pro</title>
 </svelte:head>
 
-<h1 class="text-2xl font-bold mb-6">Sign Up</h1>
+<h1 class="text-2xl font-bold mb-6">Sign Up for ReviewAI Pro</h1>
+<p class="text-gray-600 mb-4">
+  Start managing and responding to customer reviews with AI-powered assistance
+</p>
 <Auth
   supabaseClient={data.supabase}
   view="sign_up"
@@ -21,5 +24,6 @@
   additionalData={undefined}
 />
 <div class="text-l text-slate-800 mt-4 mb-2">
-  Have an account? <a class="underline" href="/login/sign_in">Sign in</a>.
+  Already have an account? <a class="underline" href="/login/sign_in">Sign in</a
+  > to manage your reviews.
 </div>

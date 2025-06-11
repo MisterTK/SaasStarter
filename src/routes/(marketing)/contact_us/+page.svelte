@@ -78,18 +78,19 @@
     class="max-w-[400px] lg:max-w-[500px] flex flex-col place-content-center p-4 lg:mr-8 lg:mb-8 lg:min-h-[70vh]"
   >
     <div class="px-6">
-      <h1 class="text-2xl lg:text-4xl font-bold mb-4">Contact Us</h1>
-      <p class="text-lg">Talk to one of our service professionals to:</p>
+      <h1 class="text-2xl lg:text-4xl font-bold mb-4">
+        Let's Transform Your Reviews
+      </h1>
+      <p class="text-lg">Talk to our review management experts to:</p>
       <ul class="list-disc list-outside pl-6 py-4 space-y-1">
-        <li class="">Get a live demo</li>
-        <li class="">Discuss your specific needs</li>
-        <li>Get a quote</li>
-        <li>Answer any technical questions you have</li>
+        <li class="">See ReviewAI Pro in action with your actual reviews</li>
+        <li class="">Learn how AI can match your brand voice</li>
+        <li>Get ROI projections for your business</li>
+        <li>Discuss custom integrations and requirements</li>
       </ul>
-      <p>Once you complete the form, we'll reach out to you! *</p>
+      <p>Complete the form and we'll reach out within 24 hours!</p>
       <p class="text-sm pt-8">
-        *Not really for this demo page, but you should say something like that
-        😉
+        Or call us directly at 1-800-REVIEWS for immediate assistance
       </p>
     </div>
   </div>

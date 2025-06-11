@@ -82,7 +82,7 @@
           <div class="flex items-center gap-2 mb-1">
             <h3 class="font-semibold">{data.review.reviewer.displayName}</h3>
             <div class="rating rating-sm">
-              {#each Array(5) as _, i}
+              {#each [...Array(5).keys()] as i (i)}
                 <input
                   type="radio"
                   class="mask mask-star-2 bg-orange-400"

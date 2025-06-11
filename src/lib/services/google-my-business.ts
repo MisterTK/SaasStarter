@@ -1,4 +1,4 @@
-interface GoogleToken {
+export interface GoogleToken {
   access_token: string
   refresh_token: string
   expires_at: string

@@ -1,5 +1,5 @@
-export const WebsiteName: string = "SaaS Starter"
-export const WebsiteBaseUrl: string = "https://saasstarter.work"
+export const WebsiteName: string = "ReviewAI Pro"
+export const WebsiteBaseUrl: string = "https://reviewaipro.com"
 export const WebsiteDescription: string =
-  "Open source, fast, and free to host SaaS template. Built with SvelteKit, Supabase, Stripe, Tailwind, DaisyUI, and Postgres"
+  "AI-powered review response management platform. Generate professional responses to customer reviews across all platforms with AI assistance. Save time and improve customer satisfaction."
 export const CreateProfileStep: boolean = true

@@ -1,6 +1,6 @@
 export const blogInfo = {
-  name: "SaaS Starter Blog",
-  description: "A sample blog",
+  name: "ReviewAI Pro Blog",
+  description: "Insights and strategies for mastering online review management",
 }
 
 export type BlogPost = {
@@ -15,22 +15,25 @@ export type BlogPost = {
 // Create a page in the "(posts)" directory for each entry
 const blogPosts: BlogPost[] = [
   {
-    title: "How we built a beautiful 41kb SaaS website with this template",
-    description: "How to use this template you to bootstrap your own site.",
-    link: "/blog/how_we_built_our_41kb_saas_website",
+    title: "5 Ways AI is Revolutionizing Review Management",
+    description:
+      "Discover how artificial intelligence is transforming the way businesses handle customer feedback and online reviews.",
+    link: "/blog/ai_revolutionizing_review_management",
     date: "2024-03-10",
   },
   {
-    title: "Example Blog Post 2",
-    description: "Even more example content!",
-    link: "/blog/awesome_post",
-    date: "2022-9-23",
+    title: "The True Cost of Ignoring Customer Reviews",
+    description:
+      "Learn why neglecting online reviews can cost your business thousands in lost revenue and how to avoid common pitfalls.",
+    link: "/blog/cost_of_ignoring_reviews",
+    date: "2024-02-23",
   },
   {
-    title: "Example Blog Post",
-    description: "A sample blog post, showing our blog engine",
-    link: "/blog/example_blog_post",
-    date: "2023-03-13",
+    title: "Building Trust at Scale: A Guide to Review Response",
+    description:
+      "Best practices for crafting personalized, effective responses to customer reviews that build trust and drive sales.",
+    link: "/blog/building_trust_review_response",
+    date: "2024-01-13",
   },
 ]
 

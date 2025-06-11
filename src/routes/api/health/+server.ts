@@ -25,10 +25,7 @@ export const GET: RequestHandler = async ({ locals: { supabase } }) => {
     checks.checks.database = dbError ? "error" : "ok"
 
     // Check auth service
-    const {
-      data: { session },
-      error: authError,
-    } = await supabase.auth.getSession()
+    const { error: authError } = await supabase.auth.getSession()
     checks.checks.auth = authError ? "error" : "ok"
 
     // Overall status

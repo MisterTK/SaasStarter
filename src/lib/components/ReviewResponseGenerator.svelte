@@ -87,7 +87,7 @@
               try {
                 const parsed = JSON.parse(data)
                 generatedResponse += parsed.text || ""
-              } catch (e) {
+              } catch {
                 // Skip invalid JSON
               }
             }
