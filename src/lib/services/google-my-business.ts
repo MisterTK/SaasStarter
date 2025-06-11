@@ -51,6 +51,10 @@ export class GoogleMyBusinessService {
       access_token: string
       expires_at: string
     }) => Promise<void>,
+    private credentials?: {
+      clientId: string
+      clientSecret: string
+    }
   ) {}
 
   private async makeRequest(url: string, options: RequestInit = {}) {
@@ -89,8 +93,8 @@ export class GoogleMyBusinessService {
       },
       body: new URLSearchParams({
         refresh_token: this.refreshToken,
-        client_id: process.env.PUBLIC_GOOGLE_CLIENT_ID || "",
-        client_secret: process.env.GOOGLE_CLIENT_SECRET || "",
+        client_id: this.credentials?.clientId || "",
+        client_secret: this.credentials?.clientSecret || "",
         grant_type: "refresh_token",
       }),
     })

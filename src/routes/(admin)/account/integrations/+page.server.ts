@@ -1,10 +1,11 @@
 import { redirect, fail } from "@sveltejs/kit"
 import type { PageServerLoad, Actions } from "./$types"
+import crypto from "crypto"
+import { GoogleMyBusinessWrapper } from "$lib/services/google-my-business-wrapper"
+import { env as publicEnv } from "$env/dynamic/public"
+import { env as privateEnv } from "$env/dynamic/private"
 
-const GOOGLE_OAUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
-const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
-const GOOGLE_MY_BUSINESS_SCOPE =
-  "https://www.googleapis.com/auth/business.manage"
+// OAuth URLs are now handled by GoogleMyBusinessWrapper
 
 export const load: PageServerLoad = async ({
   locals: { safeGetSession, supabaseServiceRole },
@@ -32,66 +33,76 @@ export const load: PageServerLoad = async ({
   // Handle OAuth callback
   const code = url.searchParams.get("code")
   const state = url.searchParams.get("state")
+  const error = url.searchParams.get("error")
+
+  if (error) {
+    return {
+      googleConnected: !!googleToken,
+      businessAccounts: null,
+      error: error === "access_denied" ? "Authorization was cancelled" : `OAuth error: ${error}`
+    }
+  }
 
   if (code && state) {
     // Verify state matches
     const expectedState = cookies.get("google_oauth_state")
-    if (state !== expectedState) {
-      return fail(400, { error: "Invalid OAuth state" })
+    if (!expectedState || state !== expectedState) {
+      return {
+        googleConnected: !!googleToken,
+        businessAccounts: null,
+        error: "Invalid OAuth state - please try again"
+      }
     }
 
     try {
-      // Exchange code for tokens
-      const tokenResponse = await fetch(GOOGLE_TOKEN_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          code,
-          client_id: process.env.PUBLIC_GOOGLE_CLIENT_ID || "",
-          client_secret: process.env.GOOGLE_CLIENT_SECRET || "",
-          redirect_uri: `${url.origin}/account/integrations`,
-          grant_type: "authorization_code",
-        }),
+      // Handle OAuth callback with the wrapper
+      const gmb = new GoogleMyBusinessWrapper(supabaseServiceRole, {
+        clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
+        clientSecret: privateEnv.GOOGLE_CLIENT_SECRET,
+        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
       })
+      await gmb.handleOAuthCallback(code, orgId, user.id, `${url.origin}/account/integrations`)
 
-      const tokens = await tokenResponse.json()
+      // Clear state cookie
+      cookies.delete("google_oauth_state", { path: "/" })
 
-      if (tokens.access_token && tokens.refresh_token) {
-        // Store tokens in database
-        const expiresAt = new Date(Date.now() + tokens.expires_in * 1000)
-
-        await supabaseServiceRole.from("google_tokens").upsert({
-          organization_id: orgId,
-          user_id: user.id,
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
-          expires_at: expiresAt.toISOString(),
-        })
-
-        // Clear state cookie
-        cookies.delete("google_oauth_state", { path: "/" })
-
-        // Redirect to clear URL parameters
-        redirect(303, "/account/integrations")
+      // Redirect to clear URL parameters and show success
+      redirect(303, "/account/integrations?success=true")
+    } catch (err) {
+      console.error("Error exchanging OAuth code:", err)
+      // Clear state cookie on error
+      cookies.delete("google_oauth_state", { path: "/" })
+      
+      return {
+        googleConnected: !!googleToken,
+        businessAccounts: null,
+        error: err instanceof Error ? err.message : "Failed to connect Google account"
       }
-    } catch (error) {
-      console.error("Error exchanging OAuth code:", error)
-      return fail(500, { error: "Failed to connect Google account" })
     }
   }
 
+  const gmb = new GoogleMyBusinessWrapper(supabaseServiceRole, {
+    clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
+    clientSecret: privateEnv.GOOGLE_CLIENT_SECRET,
+    encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
+  })
+  const tokenValid = await gmb.hasValidToken(orgId)
   let businessAccounts = null
-  if (googleToken && googleToken.access_token) {
-    // TODO: Fetch business accounts from Google My Business API
-    // For now, return mock data
-    businessAccounts = [{ name: "Example Business", location_count: 3 }]
+  
+  if (tokenValid) {
+    try {
+      // Fetch actual business accounts from Google My Business API
+      businessAccounts = await gmb.listAccounts(orgId)
+    } catch (err) {
+      console.error("Error fetching business accounts:", err)
+      // Token might be invalid, don't throw error but show as disconnected
+    }
   }
 
   return {
-    googleConnected: !!googleToken,
+    googleConnected: tokenValid,
     businessAccounts,
+    success: url.searchParams.get("success") === "true"
   }
 }
 
@@ -107,18 +118,14 @@ export const actions: Actions = {
       maxAge: 60 * 10, // 10 minutes
     })
 
-    // Build OAuth URL
-    const params = new URLSearchParams({
-      client_id: process.env.PUBLIC_GOOGLE_CLIENT_ID || "",
-      redirect_uri: `${url.origin}/account/integrations`,
-      response_type: "code",
-      scope: `openid email profile ${GOOGLE_MY_BUSINESS_SCOPE}`,
-      access_type: "offline",
-      prompt: "consent",
-      state,
+    // Build OAuth URL with the wrapper
+    const gmb = new GoogleMyBusinessWrapper(null, {
+      clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID
     })
+    const redirectUri = `${url.origin}/account/integrations`
+    const authUrl = gmb.getAuthUrl(state, redirectUri)
 
-    redirect(303, `${GOOGLE_OAUTH_URL}?${params}`)
+    redirect(303, authUrl)
   },
 
   disconnectGoogle: async ({
@@ -135,17 +142,16 @@ export const actions: Actions = {
       return fail(400, { error: "No organization selected" })
     }
 
-    // Delete the Google token
-    const { error } = await supabaseServiceRole
-      .from("google_tokens")
-      .delete()
-      .eq("organization_id", orgId)
-      .eq("user_id", user.id)
-
-    if (error) {
+    // Disconnect using the wrapper (handles revocation)
+    try {
+      const gmb = new GoogleMyBusinessWrapper(supabaseServiceRole, {
+        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
+      })
+      await gmb.revokeToken(orgId)
+      return { success: true }
+    } catch (error) {
+      console.error("Error disconnecting Google:", error)
       return fail(500, { error: "Failed to disconnect Google account" })
     }
-
-    return { success: true }
   },
 }
