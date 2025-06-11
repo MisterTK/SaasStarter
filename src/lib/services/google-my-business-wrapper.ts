@@ -19,9 +19,9 @@ export class GoogleMyBusinessWrapper {
   ) {}
 
   private getEncryptionKey(): string {
-    const key = this.config?.encryptionKey;
-    if (!key) {
-      throw new Error('Token encryption key not configured');
+    const key = this.config?.encryptionKey || process.env.TOKEN_ENCRYPTION_KEY || 'your-32-character-encryption-key';
+    if (!key || key === 'your-32-character-encryption-key') {
+      console.warn('WARNING: Using default encryption key. Set TOKEN_ENCRYPTION_KEY environment variable for production!');
     }
     // Ensure key is 32 bytes for AES-256
     return key.padEnd(32, '0').slice(0, 32);

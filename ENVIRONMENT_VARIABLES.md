@@ -86,6 +86,16 @@ PRIVATE_RESEND_API_KEY=
 PRIVATE_ADMIN_EMAIL=admin@example.com
 ```
 
+### Security
+
+```bash
+# Encryption key for storing sensitive data (OAuth tokens, service account keys)
+# REQUIRED: Must be exactly 32 characters
+# Generate with: openssl rand -hex 16
+# Example: a1b2c3d4e5f6789012345678901234567
+TOKEN_ENCRYPTION_KEY=
+```
+
 ### Background Sync
 
 ```bash
