@@ -28,7 +28,6 @@ export const actions: Actions = {
     const formData = await request.formData()
     const name = formData.get("name") as string
     const slug = formData.get("slug") as string
-    const businessType = formData.get("businessType") as string
 
     // Validate inputs
     const errors: FormErrors = {}

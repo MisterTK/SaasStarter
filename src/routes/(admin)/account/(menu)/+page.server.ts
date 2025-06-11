@@ -1,8 +1,5 @@
 import { redirect } from "@sveltejs/kit"
 import type { PageServerLoad } from "./$types"
-import type { Database } from "$lib/../DatabaseDefinitions"
-
-type Tables = Database['public']['Tables']
 
 export const load: PageServerLoad = async ({
   locals: { safeGetSession, supabaseServiceRole },
