@@ -145,35 +145,50 @@ export const load: PageServerLoad = async ({
   )
 
   try {
-    // Fetch real data from Google My Business
-    const accounts = await gmb.getAccounts()
+    // Fetch all accessible locations using the new wildcard approach
+    // This will get both account-owned and directly shared locations
+    const locations = await gmb.getAllAccessibleLocations()
     let allReviews: Review[] = []
     const accountsWithLocations: Account[] = []
 
-    // For each account, fetch locations and reviews
-    for (const account of accounts) {
-      const locations = await gmb.getLocations(account.accountId)
+    // Group locations by account for backward compatibility
+    const locationsByAccount = new Map<string, Location[]>()
+    
+    for (const location of locations) {
+      // Extract account ID from location name (e.g., "accounts/123/locations/456")
+      const accountMatch = location.name.match(/accounts\/([^/]+)/)
+      const accountId = accountMatch ? accountMatch[1] : 'shared'
+      
+      if (!locationsByAccount.has(accountId)) {
+        locationsByAccount.set(accountId, [])
+      }
+      locationsByAccount.get(accountId)!.push(location)
+    }
 
+    // Create account objects for display
+    for (const [accountId, locs] of locationsByAccount) {
       accountsWithLocations.push({
-        ...account,
-        locations,
+        name: accountId === 'shared' ? 'Shared Locations' : `Account ${accountId}`,
+        accountId: `accounts/${accountId}`,
+        locations: locs,
       })
+    }
 
-      // Fetch reviews for each location
-      for (const location of locations) {
-        const reviews = await gmb.getReviews(
-          account.accountId,
-          location.locationId,
-        )
+    // Fetch reviews for each location using the new method
+    for (const location of locations) {
+      try {
+        const reviews = await gmb.getReviewsByLocationName(location.name)
 
         // Add location name to each review
         const reviewsWithLocation = reviews.map((review) => ({
           ...review,
           reviewId: review.reviewId || review.name || 'unknown',
-          locationName: location.name || location.title || '',
+          locationName: location.title || location.name || '',
         }))
 
         allReviews = [...allReviews, ...reviewsWithLocation]
+      } catch (error) {
+        console.error(`Failed to fetch reviews for location ${location.name}:`, error)
       }
     }
 

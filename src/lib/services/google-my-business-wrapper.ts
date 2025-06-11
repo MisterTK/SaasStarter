@@ -275,6 +275,42 @@ export class GoogleMyBusinessWrapper {
     return service.acceptInvitation(invitationName);
   }
 
+  async getAllReviews(organizationId: string) {
+    const service = await this.createService(organizationId);
+    if (!service) {
+      throw new Error('No Google connection found');
+    }
+
+    return service.getAllReviews();
+  }
+
+  async getReviewsByLocationName(organizationId: string, locationName: string) {
+    const service = await this.createService(organizationId);
+    if (!service) {
+      throw new Error('No Google connection found');
+    }
+
+    return service.getReviewsByLocationName(locationName);
+  }
+
+  async replyToReviewByName(organizationId: string, reviewName: string, comment: string) {
+    const service = await this.createService(organizationId);
+    if (!service) {
+      throw new Error('No Google connection found');
+    }
+
+    return service.replyToReviewByName(reviewName, comment);
+  }
+
+  async deleteReviewReplyByName(organizationId: string, reviewName: string) {
+    const service = await this.createService(organizationId);
+    if (!service) {
+      throw new Error('No Google connection found');
+    }
+
+    return service.deleteReviewReplyByName(reviewName);
+  }
+
   async revokeToken(organizationId: string): Promise<void> {
     const tokens = await this.getTokens(organizationId);
     if (!tokens) {

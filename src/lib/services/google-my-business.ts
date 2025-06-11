@@ -164,6 +164,37 @@ export class GoogleMyBusinessService {
     return data.locations || []
   }
 
+  async getLocationsForAccount(accountId: string): Promise<BusinessLocation[]> {
+    // This method maintains backward compatibility
+    return this.getLocations(accountId)
+  }
+
+  // Get ALL locations the user has access to using wildcard account
+  async getAllLocationsWithWildcard(): Promise<BusinessLocation[]> {
+    const response = await this.makeRequest(
+      `${GOOGLE_MY_BUSINESS_API}/accounts/-/locations?readMask=name,title`,
+    )
+
+    if (!response.ok) {
+      console.error("Failed to fetch locations with wildcard:", await response.text())
+      return []
+    }
+
+    const data = await response.json()
+    const locations = data.locations || []
+    
+    // Process locations to ensure they have the expected structure
+    return locations.map((location: BusinessLocation) => ({
+      name: location.name,
+      locationId: location.name.split('/').pop() || '',
+      title: location.title,
+      // These fields won't be available with the limited readMask, but we keep them for compatibility
+      address: location.address,
+      primaryPhone: location.primaryPhone,
+      websiteUrl: location.websiteUrl,
+    }))
+  }
+
   async getInvitations(): Promise<Invitation[]> {
     // Note: The invitations endpoint doesn't require an account ID
     // It returns all invitations for the authenticated user
@@ -199,10 +230,31 @@ export class GoogleMyBusinessService {
 
   // Get all locations the user has access to (including those without account access)
   async getAllAccessibleLocations(): Promise<BusinessLocation[]> {
+    try {
+      // Use the wildcard account approach to get ALL locations at once
+      // This includes both account-owned locations AND directly shared locations
+      const wildcardLocations = await this.getAllLocationsWithWildcard()
+      
+      if (wildcardLocations.length > 0) {
+        console.log(`Found ${wildcardLocations.length} locations using wildcard approach`)
+        return wildcardLocations
+      }
+      
+      // Fallback to the old approach if wildcard fails or returns no results
+      console.log("Wildcard approach returned no locations, falling back to account-based approach")
+      return await this.getAllAccessibleLocationsViaAccounts()
+    } catch (error) {
+      console.error("Failed to fetch locations with wildcard, falling back to account-based approach:", error)
+      return await this.getAllAccessibleLocationsViaAccounts()
+    }
+  }
+
+  // Legacy method that iterates through accounts - kept as fallback
+  private async getAllAccessibleLocationsViaAccounts(): Promise<BusinessLocation[]> {
     const allLocations: BusinessLocation[] = []
     const locationIds = new Set<string>() // Track unique locations
     
-    // First, get all locations from accounts we own or have access to
+    // Get all locations from accounts we own or have access to
     const accounts = await this.getAccounts()
     for (const account of accounts) {
       try {
@@ -221,15 +273,9 @@ export class GoogleMyBusinessService {
 
     // Check for any pending invitations that might give us access to additional locations
     const invitations = await this.getInvitations()
-    console.log("Found invitations:", invitations)
-
-    // The invitations will show us locations we've been invited to but haven't accepted yet
-    // Once accepted, the locations will show up through the accounts above
-    
-    // Note: According to the API documentation, once you accept an invitation to a location,
-    // you'll have access to it through the associated account. The Google My Business API
-    // doesn't have a direct way to list "all locations I have admin access to" without
-    // going through accounts.
+    if (invitations.length > 0) {
+      console.log("Found pending invitations:", invitations)
+    }
 
     return allLocations
   }
@@ -250,6 +296,28 @@ export class GoogleMyBusinessService {
 
     const data = await response.json()
     return data.reviews || []
+  }
+
+  // Get reviews using the full location name (e.g., "accounts/123/locations/456")
+  async getReviewsByLocationName(locationName: string): Promise<Review[]> {
+    // The location name should be in the format "accounts/123/locations/456"
+    const response = await this.makeRequest(
+      `${GOOGLE_MY_BUSINESS_API}/${locationName}/reviews`,
+    )
+
+    if (!response.ok) {
+      console.error("Failed to fetch reviews by location name:", await response.text())
+      return []
+    }
+
+    const data = await response.json()
+    const reviews = data.reviews || []
+    
+    // Add the location name to each review for context
+    return reviews.map((review: Review) => ({
+      ...review,
+      locationName,
+    }))
   }
 
   async replyToReview(
@@ -273,6 +341,27 @@ export class GoogleMyBusinessService {
 
     if (!response.ok) {
       console.error("Failed to reply to review:", await response.text())
+      return false
+    }
+
+    return true
+  }
+
+  // Reply to a review using the full review name (e.g., "accounts/123/locations/456/reviews/789")
+  async replyToReviewByName(
+    reviewName: string,
+    comment: string,
+  ): Promise<boolean> {
+    const response = await this.makeRequest(
+      `${GOOGLE_MY_BUSINESS_API}/${reviewName}/reply`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ comment }),
+      },
+    )
+
+    if (!response.ok) {
+      console.error("Failed to reply to review by name:", await response.text())
       return false
     }
 
@@ -304,6 +393,25 @@ export class GoogleMyBusinessService {
     return true
   }
 
+  // Delete a review reply using the full review name (e.g., "accounts/123/locations/456/reviews/789")
+  async deleteReviewReplyByName(
+    reviewName: string,
+  ): Promise<boolean> {
+    const response = await this.makeRequest(
+      `${GOOGLE_MY_BUSINESS_API}/${reviewName}/reply`,
+      {
+        method: "DELETE",
+      },
+    )
+
+    if (!response.ok) {
+      console.error("Failed to delete review reply by name:", await response.text())
+      return false
+    }
+
+    return true
+  }
+
   async getBusinessInfo(accountId: string, locationId: string) {
     // Remove prefixes if present
     const cleanAccountId = accountId.replace("accounts/", "")
@@ -319,5 +427,39 @@ export class GoogleMyBusinessService {
     }
 
     return await response.json()
+  }
+
+  // Get business info using the full location name (e.g., "accounts/123/locations/456")
+  async getBusinessInfoByLocationName(locationName: string) {
+    const response = await this.makeRequest(
+      `${GOOGLE_MY_BUSINESS_API}/${locationName}?readMask=name,title,phoneNumbers,websiteUri,regularHours,specialHours`,
+    )
+
+    if (!response.ok) {
+      console.error("Failed to fetch business info by location name:", await response.text())
+      return null
+    }
+
+    return await response.json()
+  }
+
+  // Get all reviews for all accessible locations
+  async getAllReviews(): Promise<{ location: BusinessLocation; reviews: Review[] }[]> {
+    const locations = await this.getAllAccessibleLocations()
+    const allReviews: { location: BusinessLocation; reviews: Review[] }[] = []
+
+    for (const location of locations) {
+      try {
+        const reviews = await this.getReviewsByLocationName(location.name)
+        allReviews.push({
+          location,
+          reviews,
+        })
+      } catch (error) {
+        console.error(`Failed to fetch reviews for location ${location.name}:`, error)
+      }
+    }
+
+    return allReviews
   }
 }
