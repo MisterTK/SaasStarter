@@ -5,10 +5,11 @@ This guide walks through the complete GitOps setup for your reviews application.
 ## Current Status
 
 ✅ **Completed:**
-- Supabase local development initialized and linked to `supabase-reviews-787coffee` project
+- Supabase local development initialized and linked to `supabase-reviews-787coffee` project (temporary production)
 - GitHub Actions workflows created for CI/CD pipeline
 - Develop branch created and pushed to GitHub
 - GitOps architecture documentation added
+- Staging project created in r7ai organization
 
 ## Next Steps
 
@@ -19,10 +20,10 @@ Go to your repository settings at https://github.com/MisterTK/reviews/settings/s
 
 **Required Secrets:**
 - `SUPABASE_ACCESS_TOKEN`: Your personal access token from https://supabase.com/dashboard/account/tokens
-- `PRODUCTION_PROJECT_ID`: `roqilgdahmmxisrswbsi`
+- `PRODUCTION_PROJECT_ID`: `roqilgdahmmxisrswbsi` (temporary - will change when test site is retired)
 - `PRODUCTION_DB_PASSWORD`: Get from Supabase dashboard > Settings > Database
-- `STAGING_PROJECT_ID`: (See staging setup below)
-- `STAGING_DB_PASSWORD`: (See staging setup below)
+- `STAGING_PROJECT_ID`: `dchddqxaelzokyjsebpx` (r7ai organization)
+- `STAGING_DB_PASSWORD`: Get from Supabase dashboard > Settings > Database for staging project
 - `VERCEL_TOKEN`: Get from https://vercel.com/account/tokens
 - `VERCEL_ORG_ID`: Your Vercel team/org ID
 - `VERCEL_PROJECT_ID`: (Will be created when linking project)
@@ -40,23 +41,14 @@ Go to your repository settings at https://github.com/MisterTK/reviews/settings/s
 3. Add rule for `develop` branch:
    - Require status checks to pass before merging
 
-### 2. Supabase Staging Environment
+### 2. Supabase Environment Setup
 
-Since you're at the free tier limit, you have these options:
+✅ **Current Setup:**
+- **Staging**: `staging project` in r7ai organization (ID: `dchddqxaelzokyjsebpx`)
+- **Production**: `supabase-reviews-787coffee` (temporary - using existing test site)
 
-**Option A: Repurpose 787Demo as Staging (Recommended)**
-```bash
-# Update the project name in Supabase dashboard
-# Then get its credentials for staging
-```
-
-**Option B: Use Single Environment**
-- Use `supabase-reviews-787coffee` for both staging and production
-- Different approach: use database schemas or prefixes to separate environments
-
-**Option C: Upgrade to Pro**
-- $25/month per project
-- Allows unlimited projects
+**Future Migration Plan:**
+When the test site is retired, create a new production project in the r7ai organization alongside staging.
 
 ### 3. Vercel Setup
 
