@@ -129,6 +129,7 @@ This project includes integration with Google Vertex AI for automated review res
 ### Setup
 
 1. Set environment variables:
+
    ```
    GOOGLE_CLOUD_PROJECT=your-project-id
    GOOGLE_CLOUD_LOCATION=us-central1  # optional

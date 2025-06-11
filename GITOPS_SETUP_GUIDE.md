@@ -5,6 +5,7 @@ This guide walks through the complete GitOps setup for your reviews application.
 ## Current Status
 
 ✅ **Completed:**
+
 - Supabase local development initialized and linked to `supabase-reviews-787coffee` project (temporary production)
 - GitHub Actions workflows created for CI/CD pipeline
 - Develop branch created and pushed to GitHub
@@ -16,9 +17,11 @@ This guide walks through the complete GitOps setup for your reviews application.
 ### 1. GitHub Repository Configuration
 
 #### Set up GitHub Secrets
+
 Go to your repository settings at https://github.com/MisterTK/reviews/settings/secrets/actions and add:
 
 **Required Secrets:**
+
 - `SUPABASE_ACCESS_TOKEN`: Your personal access token from https://supabase.com/dashboard/account/tokens
 - `PRODUCTION_PROJECT_ID`: `roqilgdahmmxisrswbsi` (temporary - will change when test site is retired)
 - `PRODUCTION_DB_PASSWORD`: Get from Supabase dashboard > Settings > Database
@@ -29,9 +32,11 @@ Go to your repository settings at https://github.com/MisterTK/reviews/settings/s
 - `VERCEL_PROJECT_ID`: (Will be created when linking project)
 
 **Optional Secrets:**
+
 - `SLACK_WEBHOOK_URL`: For deployment notifications
 
 #### Set up Branch Protection
+
 1. Go to Settings > Branches
 2. Add rule for `main` branch:
    - Require pull request reviews before merging
@@ -44,6 +49,7 @@ Go to your repository settings at https://github.com/MisterTK/reviews/settings/s
 ### 2. Supabase Environment Setup
 
 ✅ **Current Setup:**
+
 - **Staging**: `staging project` in r7ai organization (ID: `dchddqxaelzokyjsebpx`)
 - **Production**: `supabase-reviews-787coffee` (temporary - using existing test site)
 
@@ -88,6 +94,7 @@ supabase gen types typescript --local > src/DatabaseDefinitions.ts
 ### 5. Development Workflow
 
 #### Daily Development
+
 ```bash
 # Start your day
 git checkout develop
@@ -113,6 +120,7 @@ git push origin feature/your-feature
 ```
 
 #### Weekly Release Process
+
 ```bash
 # Thursday: Create release branch
 git checkout develop
@@ -136,6 +144,7 @@ git push origin develop
 ### 6. Environment Variables Summary
 
 Create `.env.local` for local development:
+
 ```env
 # Already configured
 PUBLIC_SUPABASE_URL='https://roqilgdahmmxisrswbsi.supabase.co'
@@ -153,6 +162,7 @@ PRIVATE_ADMIN_EMAIL='admin@yourdomain.com'
 ### 7. Testing the Setup
 
 1. **Test CI Pipeline:**
+
    ```bash
    # Create a test PR
    git checkout -b test/ci-pipeline
@@ -163,6 +173,7 @@ PRIVATE_ADMIN_EMAIL='admin@yourdomain.com'
    ```
 
 2. **Test Staging Deployment:**
+
    ```bash
    # Merge test PR to develop
    # Watch staging deployment in GitHub Actions
@@ -184,6 +195,7 @@ PRIVATE_ADMIN_EMAIL='admin@yourdomain.com'
 ## Troubleshooting
 
 ### Migration Failures
+
 ```bash
 supabase migration list
 supabase db reset
@@ -191,6 +203,7 @@ supabase migration repair --status applied
 ```
 
 ### Type Generation Issues
+
 ```bash
 supabase gen types typescript --local > src/DatabaseDefinitions.ts
 git add src/DatabaseDefinitions.ts
@@ -198,6 +211,7 @@ git commit -m "chore: update database types"
 ```
 
 ### Vercel Deployment Issues
+
 ```bash
 vercel logs
 vercel env pull

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { enhance } from '$app/forms'
-  import type { ActionData } from './$types'
+  import { enhance } from "$app/forms"
+  import type { ActionData } from "./$types"
 
   let { form }: { form: ActionData } = $props()
 </script>
@@ -10,8 +10,12 @@
 </svelte:head>
 
 <div class="max-w-2xl mx-auto">
-  <h1 class="text-3xl font-bold mb-2">Welcome! Let's set up your organization</h1>
-  <p class="text-gray-600 mb-8">Create your organization to start managing reviews</p>
+  <h1 class="text-3xl font-bold mb-2">
+    Welcome! Let's set up your organization
+  </h1>
+  <p class="text-gray-600 mb-8">
+    Create your organization to start managing reviews
+  </p>
 
   <form method="POST" use:enhance class="space-y-6">
     <div class="form-control">
@@ -66,7 +70,11 @@
       <label for="businessType" class="label">
         <span class="label-text">Business Type</span>
       </label>
-      <select name="businessType" id="businessType" class="select select-bordered w-full">
+      <select
+        name="businessType"
+        id="businessType"
+        class="select select-bordered w-full"
+      >
         <option value="">Select your business type</option>
         <option value="restaurant">Restaurant</option>
         <option value="hotel">Hotel</option>
@@ -79,8 +87,18 @@
 
     {#if form?.errors?._}
       <div class="alert alert-error">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="stroke-current shrink-0 h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
         <span>{form.errors._}</span>
       </div>

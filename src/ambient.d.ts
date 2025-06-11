@@ -7,7 +7,7 @@ declare global {
     website?: string
     email?: string
   }
-  
+
   namespace NodeJS {
     interface ProcessEnv {
       PUBLIC_SUPABASE_URL: string

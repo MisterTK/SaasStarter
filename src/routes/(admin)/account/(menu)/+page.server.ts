@@ -1,36 +1,39 @@
 import { redirect } from "@sveltejs/kit"
-import type { PageServerLoad } from './$types'
+import type { PageServerLoad } from "./$types"
 
-export const load: PageServerLoad = async ({ locals: { safeGetSession, supabaseServiceRole }, cookies }) => {
+export const load: PageServerLoad = async ({
+  locals: { safeGetSession, supabaseServiceRole },
+  cookies,
+}) => {
   const { user } = await safeGetSession()
   if (!user) {
-    redirect(303, '/login/sign_in')
+    redirect(303, "/login/sign_in")
   }
 
   // Check if user has an organization
   const { data: orgMemberships } = await supabaseServiceRole
-    .from('organization_members')
-    .select('organization_id, role, organizations(id, name, slug)')
-    .eq('user_id', user.id)
+    .from("organization_members")
+    .select("organization_id, role, organizations(id, name, slug)")
+    .eq("user_id", user.id)
     .single()
 
   if (!orgMemberships) {
     // User has no organization, redirect to create one
-    redirect(303, '/account/create-organization')
+    redirect(303, "/account/create-organization")
   }
 
   // Store the current organization in cookies
   const currentOrg = orgMemberships.organizations as any
-  cookies.set('current_org_id', currentOrg.id, { 
-    path: '/',
+  cookies.set("current_org_id", currentOrg.id, {
+    path: "/",
     httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production'
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   })
 
   return {
     organization: currentOrg,
-    userRole: orgMemberships.role
+    userRole: orgMemberships.role,
   }
 }
 

@@ -16,7 +16,8 @@ STAGING_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 
 ## How to get the values:
 
-1. **VERCEL_TOKEN**: 
+1. **VERCEL_TOKEN**:
+
    - Go to https://vercel.com/account/tokens
    - Create a new token with full access
 

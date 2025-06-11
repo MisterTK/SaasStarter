@@ -112,15 +112,60 @@
       </li>
       <li>
         <a
+          href="/account/reviews"
+          class={adminSection === "reviews" ? "active" : ""}
+          onclick={closeDrawer}
+        >
+          <svg
+            class="h-5 w-5"
+            viewBox="0 0 24 24"
+            stroke="none"
+            fill="currentColor"
+          >
+            <path
+              d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+            />
+          </svg>
+          Reviews
+        </a>
+      </li>
+      <li>
+        <a
+          href="/account/integrations"
+          class={adminSection === "integrations" ? "active" : ""}
+          onclick={closeDrawer}
+        >
+          <svg
+            class="h-5 w-5"
+            viewBox="0 0 24 24"
+            stroke="none"
+            fill="currentColor"
+          >
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+            />
+          </svg>
+          Integrations
+        </a>
+      </li>
+      <li>
+        <a
           href="/account/ai-demo"
           class={adminSection === "ai-demo" ? "active" : ""}
           onclick={closeDrawer}
         >
-          <svg class="h-5 w-5" viewBox="0 0 24 24" stroke="none" fill="currentColor">
-            <path d="M21.928 11.607c-.202-.488-.635-.605-.928-.633V8c0-1.103-.897-2-2-2h-6V4.61c.305-.274.5-.668.5-1.11a1.5 1.5 0 0 0-3 0c0 .442.195.836.5 1.11V6H5c-1.103 0-2 .897-2 2v2.997l-.082.006A1 1 0 0 0 1.99 12v2a1 1 0 0 0 1 1H3v5c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2v-5a1 1 0 0 0 1-1v-1.938a1.006 1.006 0 0 0-.072-.455zM5 20V8h14l.001 3.996L19 12v2l.001.005.001 5.995H5z"/>
-            <ellipse cx="8.5" cy="12" rx="1.5" ry="2"/>
-            <ellipse cx="15.5" cy="12" rx="1.5" ry="2"/>
-            <path d="M8 16h8v2H8z"/>
+          <svg
+            class="h-5 w-5"
+            viewBox="0 0 24 24"
+            stroke="none"
+            fill="currentColor"
+          >
+            <path
+              d="M21.928 11.607c-.202-.488-.635-.605-.928-.633V8c0-1.103-.897-2-2-2h-6V4.61c.305-.274.5-.668.5-1.11a1.5 1.5 0 0 0-3 0c0 .442.195.836.5 1.11V6H5c-1.103 0-2 .897-2 2v2.997l-.082.006A1 1 0 0 0 1.99 12v2a1 1 0 0 0 1 1H3v5c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2v-5a1 1 0 0 0 1-1v-1.938a1.006 1.006 0 0 0-.072-.455zM5 20V8h14l.001 3.996L19 12v2l.001.005.001 5.995H5z"
+            />
+            <ellipse cx="8.5" cy="12" rx="1.5" ry="2" />
+            <ellipse cx="15.5" cy="12" rx="1.5" ry="2" />
+            <path d="M8 16h8v2H8z" />
           </svg>
           AI Demo
         </a>
