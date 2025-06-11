@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+import fetch, { RequestInit as NodeFetchRequestInit } from 'node-fetch'
 
 export interface GoogleToken {
   access_token: string
@@ -77,7 +77,7 @@ export class GoogleMyBusinessServiceAlt {
     }
   ) {}
 
-  private async makeRequest(url: string, options: RequestInit = {}) {
+  private async makeRequest(url: string, options: NodeFetchRequestInit = {}) {
     const response = await fetch(url, {
       ...options,
       headers: {

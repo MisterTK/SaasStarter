@@ -167,8 +167,8 @@ export const actions: Actions = {
 			console.error('Test API error:', error);
 			return {
 				success: false,
-				error: error.message,
-				stack: error.stack
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined
 			};
 		}
 	}
