@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Auth } from "@supabase/auth-ui-svelte"
   import { sharedAppearance, oauthProviders } from "../login_config"
+  import { getRedirectUrlFromWindow } from "$lib/auth-redirect"
 
   let { data } = $props()
 </script>
@@ -16,7 +17,7 @@
 <Auth
   supabaseClient={data.supabase}
   view="sign_up"
-  redirectTo={`${data.url}/auth/callback`}
+  redirectTo={getRedirectUrlFromWindow()}
   showLinks={false}
   providers={oauthProviders}
   socialLayout="horizontal"

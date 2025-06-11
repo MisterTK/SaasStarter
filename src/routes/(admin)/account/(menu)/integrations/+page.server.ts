@@ -4,6 +4,7 @@ import crypto from "crypto"
 import { GoogleMyBusinessWrapper } from "$lib/services/google-my-business-wrapper"
 import { env as publicEnv } from "$env/dynamic/public"
 import { env as privateEnv } from "$env/dynamic/private"
+import { getAuthRedirectUrl } from "$lib/auth-redirect"
 
 // OAuth URLs are now handled by GoogleMyBusinessWrapper
 
@@ -61,7 +62,8 @@ export const load: PageServerLoad = async ({
         clientSecret: privateEnv.GOOGLE_CLIENT_SECRET,
         encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
       })
-      await gmb.handleOAuthCallback(code, orgId, user.id, `${url.origin}/account/integrations`)
+      const redirectUrl = url.origin + '/account/integrations'
+      await gmb.handleOAuthCallback(code, orgId, user.id, redirectUrl)
 
       // Clear state cookie
       cookies.delete("google_oauth_state", { path: "/" })
@@ -107,7 +109,7 @@ export const load: PageServerLoad = async ({
 }
 
 export const actions: Actions = {
-  connectGoogle: async ({ cookies, url }) => {
+  connectGoogle: async ({ cookies, request }) => {
     // Generate random state for CSRF protection
     const state = crypto.randomUUID()
     cookies.set("google_oauth_state", state, {
@@ -122,6 +124,8 @@ export const actions: Actions = {
     const gmb = new GoogleMyBusinessWrapper(null, {
       clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID
     })
+    // Use dynamic redirect URL to support preview deployments
+    const url = new URL(request.url)
     const redirectUri = `${url.origin}/account/integrations`
     const authUrl = gmb.getAuthUrl(state, redirectUri)
 

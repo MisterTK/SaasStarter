@@ -4,6 +4,7 @@
   import { goto } from "$app/navigation"
   import { onMount } from "svelte"
   import { page } from "$app/stores"
+  import { getRedirectUrlFromWindow } from "$lib/auth-redirect"
 
   let { data } = $props()
   let { supabase } = data
@@ -51,7 +52,7 @@
 <Auth
   supabaseClient={data.supabase}
   view="sign_in"
-  redirectTo={`${data.url}/auth/callback`}
+  redirectTo={getRedirectUrlFromWindow()}
   providers={oauthProviders}
   socialLayout="horizontal"
   showLinks={false}
