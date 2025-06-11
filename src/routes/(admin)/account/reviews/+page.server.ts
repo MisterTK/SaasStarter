@@ -2,7 +2,8 @@ import { redirect } from "@sveltejs/kit"
 import type { PageServerLoad } from "./$types"
 
 interface Review {
-  reviewId: string
+  reviewId?: string
+  name?: string
   reviewer: {
     displayName: string
     profilePhotoUrl?: string | null
@@ -15,13 +16,16 @@ interface Review {
     comment: string
     updateTime: string
   } | null
-  locationName: string
+  locationName?: string
 }
 
 interface Location {
   name: string
   locationId: string
-  address: string
+  title?: string
+  address?: {
+    addressLines?: string[]
+  } | string
   primaryPhone?: string
   websiteUrl?: string
 }
@@ -39,6 +43,7 @@ interface Account {
 export const load: PageServerLoad = async ({
   locals: { safeGetSession, supabaseServiceRole },
   cookies,
+  url,
 }) => {
   const { user } = await safeGetSession()
   if (!user) {
@@ -64,6 +69,7 @@ export const load: PageServerLoad = async ({
       connected: false,
       reviews: [],
       accounts: [],
+      imported: url.searchParams.get("imported"),
     }
   }
 
@@ -163,7 +169,8 @@ export const load: PageServerLoad = async ({
         // Add location name to each review
         const reviewsWithLocation = reviews.map((review) => ({
           ...review,
-          locationName: location.name,
+          reviewId: review.reviewId || review.name || 'unknown',
+          locationName: location.name || location.title || '',
         }))
 
         allReviews = [...allReviews, ...reviewsWithLocation]
@@ -260,6 +267,7 @@ export const load: PageServerLoad = async ({
       accounts: mockAccounts,
       error:
         "Using demo data. Connect a real Google My Business account to see actual reviews.",
+      imported: url.searchParams.get("imported"),
     }
   }
 }

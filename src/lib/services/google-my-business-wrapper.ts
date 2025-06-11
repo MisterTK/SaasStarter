@@ -248,6 +248,33 @@ export class GoogleMyBusinessWrapper {
     return service.getReviews(accountId, locationId);
   }
 
+  async getAllAccessibleLocations(organizationId: string) {
+    const service = await this.createService(organizationId);
+    if (!service) {
+      throw new Error('No Google connection found');
+    }
+
+    return service.getAllAccessibleLocations();
+  }
+
+  async getInvitations(organizationId: string) {
+    const service = await this.createService(organizationId);
+    if (!service) {
+      throw new Error('No Google connection found');
+    }
+
+    return service.getInvitations();
+  }
+
+  async acceptInvitation(organizationId: string, invitationName: string) {
+    const service = await this.createService(organizationId);
+    if (!service) {
+      throw new Error('No Google connection found');
+    }
+
+    return service.acceptInvitation(invitationName);
+  }
+
   async revokeToken(organizationId: string): Promise<void> {
     const tokens = await this.getTokens(organizationId);
     if (!tokens) {

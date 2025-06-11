@@ -31,7 +31,7 @@ export const getOrCreateCustomerId = async ({
   // Fetch data needed to create customer
   const { data: profile, error: profileError } = await supabaseServiceRole
     .from("profiles")
-    .select(`full_name, website, company_name`)
+    .select(`full_name, website`)
     .eq("id", user.id)
     .single()
   if (profileError) {
@@ -46,7 +46,6 @@ export const getOrCreateCustomerId = async ({
       name: profile.full_name ?? "",
       metadata: {
         user_id: user.id,
-        company_name: profile.company_name ?? "",
         website: profile.website ?? "",
       },
     })
@@ -62,9 +61,8 @@ export const getOrCreateCustomerId = async ({
   const { error: insertError } = await supabaseServiceRole
     .from("stripe_customers")
     .insert({
-      user_id: user.id,
+      id: user.id,
       stripe_customer_id: customer.id,
-      updated_at: new Date().toISOString(),
     })
 
   if (insertError) {

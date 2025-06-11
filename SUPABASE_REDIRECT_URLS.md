@@ -32,3 +32,17 @@ The codebase now includes:
 - Google OAuth integration that preserves the current domain
 
 This ensures users stay on the same domain throughout the authentication flow, whether on production or a preview deployment.
+
+## Google OAuth Configuration
+
+For Google My Business OAuth to work on preview deployments, you also need to:
+
+1. Go to your Google Cloud Console
+2. Navigate to APIs & Services → Credentials
+3. Edit your OAuth 2.0 Client ID
+4. Add the following Authorized redirect URIs:
+   - `https://reviews-dusky.vercel.app/account/integrations`
+   - `https://reviews-git-develop-mistertks-projects.vercel.app/account/integrations`
+   - Any other preview deployment URLs you want to support
+
+Note: Google OAuth doesn't support wildcards, so you'll need to add each preview deployment URL manually if you want OAuth to work there.

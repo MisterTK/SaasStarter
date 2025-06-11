@@ -100,13 +100,7 @@ export const actions: Actions = {
       })
     }
 
-    // Store business type in profile if provided
-    if (businessType) {
-      await supabaseServiceRole
-        .from("profiles")
-        .update({ company_name: businessType })
-        .eq("id", user.id)
-    }
+    // TODO: Store business type somewhere if needed in the future
 
     // Set the organization cookie
     cookies.set("current_org_id", newOrg.id, {

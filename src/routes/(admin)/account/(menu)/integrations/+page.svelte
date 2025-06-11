@@ -17,7 +17,13 @@
 {#if data.success}
   <div class="alert alert-success mb-6">
     <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-    <span>Successfully connected Google My Business account!</span>
+    <span>
+      {#if data.successType === 'invitation-accepted'}
+        Successfully accepted the invitation!
+      {:else}
+        Successfully connected Google My Business account!
+      {/if}
+    </span>
   </div>
 {/if}
 
@@ -99,25 +105,122 @@
         {/if}
       </div>
 
-      {#if data.googleConnected && data.businessAccounts}
-        <div class="mt-4 pt-4 border-t">
-          <h4 class="font-medium mb-2">Connected Business Accounts</h4>
-          <div class="space-y-2">
-            {#each data.businessAccounts as account}
-              <div
-                class="flex items-center justify-between p-3 bg-base-200 rounded-lg"
-              >
-                <div>
-                  <div class="font-medium text-sm">{account.name}</div>
-                  <div class="text-xs text-gray-500">
-                    {account.type} • {account.role}
+      {#if data.googleConnected}
+        {#if data.invitations && data.invitations.length > 0}
+          <div class="mt-4 pt-4 border-t">
+            <h4 class="font-medium mb-2">Pending Invitations</h4>
+            <p class="text-sm text-gray-600 mb-3">
+              These are locations you've been invited to manage.
+            </p>
+            <div class="space-y-2">
+              {#each data.invitations as invitation}
+                <div
+                  class="flex items-center justify-between p-3 bg-warning/10 border border-warning rounded-lg"
+                >
+                  <div>
+                    {#if invitation.targetLocation}
+                      <div class="font-medium text-sm">{invitation.targetLocation.locationName}</div>
+                      {#if invitation.targetLocation.address}
+                        <div class="text-xs text-gray-500">{invitation.targetLocation.address}</div>
+                      {/if}
+                    {:else if invitation.targetAccount}
+                      <div class="font-medium text-sm">{invitation.targetAccount.accountName}</div>
+                      {#if invitation.targetAccount.email}
+                        <div class="text-xs text-gray-500">{invitation.targetAccount.email}</div>
+                      {/if}
+                    {/if}
+                    <div class="text-xs text-gray-500 mt-1">
+                      Role: {invitation.role} • Status: {invitation.state}
+                    </div>
                   </div>
+                  <form method="POST" action="?/acceptInvitation">
+                    <input type="hidden" name="invitationName" value={invitation.name} />
+                    <button type="submit" class="btn btn-sm btn-primary">
+                      Accept
+                    </button>
+                  </form>
                 </div>
-                <button class="btn btn-xs btn-ghost">View Locations</button>
-              </div>
-            {/each}
+              {/each}
+            </div>
           </div>
-        </div>
+        {/if}
+        
+        {#if data.businessAccounts && data.businessAccounts.length > 0}
+          <div class="mt-4 pt-4 border-t">
+            <h4 class="font-medium mb-2">Business Accounts</h4>
+            <div class="space-y-2">
+              {#each data.businessAccounts as account}
+                <div
+                  class="flex items-center justify-between p-3 bg-base-200 rounded-lg"
+                >
+                  <div>
+                    <div class="font-medium text-sm">{account.name}</div>
+                    <div class="text-xs text-gray-500">
+                      {account.type} • {account.role}
+                    </div>
+                  </div>
+                  <div class="badge badge-neutral badge-sm">{account.state}</div>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
+        
+        {#if data.accessibleLocations && data.accessibleLocations.length > 0}
+          <div class="mt-4 pt-4 border-t">
+            <h4 class="font-medium mb-2">Accessible Locations</h4>
+            <p class="text-sm text-gray-600 mb-3">
+              These are all locations you have access to, including those shared with you.
+            </p>
+            <div class="space-y-2">
+              {#each data.accessibleLocations as location}
+                <div
+                  class="flex items-center justify-between p-3 bg-base-200 rounded-lg"
+                >
+                  <div>
+                    <div class="font-medium text-sm">{location.title || location.name}</div>
+                    {#if location.address}
+                      <div class="text-xs text-gray-500">
+                        {#if typeof location.address === 'object' && location.address.addressLines}
+                          {location.address.addressLines.join(', ')}
+                        {:else}
+                          {location.address}
+                        {/if}
+                      </div>
+                    {/if}
+                    {#if location.primaryPhone}
+                      <div class="text-xs text-gray-500">{location.primaryPhone}</div>
+                    {/if}
+                  </div>
+                  <form method="POST" action="?/importReviews">
+                    <input type="hidden" name="accountId" value={location.name.split('/')[1]} />
+                    <input type="hidden" name="locationId" value={location.name.split('/')[3] || location.locationId} />
+                    <input type="hidden" name="locationName" value={location.title || location.name} />
+                    <button type="submit" class="btn btn-xs btn-primary">Import Reviews</button>
+                  </form>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {:else if data.businessAccounts && data.businessAccounts.length === 0 && (!data.accessibleLocations || data.accessibleLocations.length === 0)}
+          <div class="mt-4 pt-4 border-t">
+            <div class="alert alert-info">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div>
+                <h3 class="font-bold">No business locations found</h3>
+                <div class="text-xs">
+                  <p>This could mean:</p>
+                  <ul class="list-disc ml-5 mt-1">
+                    <li>Your Google account doesn't have any Google My Business locations</li>
+                    <li>You need to be invited to manage a location by the business owner</li>
+                    <li>You have pending invitations (check above)</li>
+                  </ul>
+                  <p class="mt-2">Ask the business owner to invite your Google account email to manage their location.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        {/if}
       {/if}
     </div>
   </div>

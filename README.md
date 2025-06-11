@@ -25,20 +25,20 @@ ReviewAI Pro is an AI-powered review management platform that helps businesses r
 
 ### Key Features
 
-- **AI-Powered Response Generation**: Generate personalized, professional responses to customer reviews in seconds
-- **Multi-Platform Support**: Manage reviews from Google Business, Yelp, TripAdvisor, Facebook, and more
-- **Brand Voice Training**: AI learns your unique tone and style for authentic responses
-- **Team Collaboration**: Multi-user support with role-based permissions
-- **Analytics & Insights**: Track response performance and customer sentiment
-- **Automated Workflows**: Set up rules for automatic response handling
-- **Real-Time Notifications**: Get instant alerts for new reviews
-- **Lightning Fast**: Built for performance with 100/100 Google PageSpeed scores
+- **AI-Powered Response Generation**: Generate personalized, professional responses using Google's Gemini models
+- **Google My Business Integration**: Direct OAuth integration for seamless review management
+- **Automated Background Sync**: Keep reviews up-to-date with configurable sync schedules
+- **Multi-Tenant Architecture**: Secure organization-based data isolation with team collaboration
+- **Real-Time Streaming**: AI responses stream in real-time for better UX
+- **Token Management**: Secure OAuth token storage with automatic refresh
+- **Enterprise Security**: Row-level security with encrypted token storage
+- **Lightning Fast**: Built for performance with edge runtime compatibility
 
 ## Tech Stack
 
 Built on the robust foundation of CMSaasStarter with additional AI capabilities:
 
-- **Web Framework**: SvelteKit (v2.21.4) 
+- **Web Framework**: SvelteKit (v2.21.4) with Svelte 5
 - **CSS / Styling**
   - Framework: TailwindCSS (v4.1.8)
   - Component library: DaisyUI (v5.0.43)
@@ -46,9 +46,14 @@ Built on the robust foundation of CMSaasStarter with additional AI capabilities:
   - Vercel AI SDK for streaming responses
   - Google Vertex AI (Gemini models) for advanced language understanding
   - Edge runtime compatible for global performance
+- **Google Integration**
+  - Google My Business API for review management
+  - OAuth 2.0 for secure authentication
+  - Automatic token refresh mechanism
 - **Backend Services**
-  - Database: PostgreSQL via Supabase
-  - Authentication: Supabase Auth with OAuth support
+  - Database: PostgreSQL via Supabase with RLS
+  - Authentication: Supabase Auth with Google OAuth
+  - Background Jobs: Vercel Cron or Supabase Edge Functions
   - Payments: Stripe Checkout & Subscriptions
   - Email: Handlebars templates + Resend API
 - **Development Tools**
@@ -63,8 +68,12 @@ Built on the robust foundation of CMSaasStarter with additional AI capabilities:
 
 - Node.js 18+ 
 - A Supabase account (free tier works)
+- Google Cloud account with:
+  - Billing enabled
+  - Vertex AI API enabled
+  - OAuth consent screen configured
 - A Stripe account for payments (optional)
-- Google Cloud account for AI features (optional)
+- Google My Business account for testing
 
 ### Installation
 
@@ -86,21 +95,36 @@ cp .env.example .env.local
 
 4. Configure your `.env.local` file:
 ```
+# Supabase
 PUBLIC_SUPABASE_URL=your_supabase_url
 PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 PRIVATE_SUPABASE_SERVICE_ROLE=your_service_role_key
+
+# Google OAuth (for My Business integration)
+PUBLIC_GOOGLE_CLIENT_ID=your_oauth_client_id
+GOOGLE_CLIENT_SECRET=your_oauth_client_secret
+
+# Vertex AI
+GOOGLE_CLOUD_PROJECT=your_gcp_project
+GOOGLE_CLOUD_LOCATION=us-central1
+GOOGLE_APPLICATION_CREDENTIALS=path_to_service_account.json
+
+# Optional
 PRIVATE_STRIPE_API_KEY=your_stripe_key
 PRIVATE_RESEND_API_KEY=your_resend_key
-GOOGLE_CLOUD_PROJECT=your_gcp_project
-GOOGLE_APPLICATION_CREDENTIALS=path_to_service_account.json
+CRON_SECRET=your_cron_secret  # For background sync
 ```
 
-5. Run database migrations:
-```bash
-npm run db:migrate
-```
+5. Apply database schema:
+   - If using an existing Supabase project, run the migrations in the SQL editor
+   - See `supabase/migrations/` for the schema files
 
-6. Start the development server:
+6. Configure Google OAuth in Supabase:
+   - Go to Authentication → Providers → Google
+   - Add your Google OAuth credentials
+   - Configure redirect URLs
+
+7. Start the development server:
 ```bash
 npm run dev
 ```
@@ -165,19 +189,36 @@ src/
 └── app.html            # Main HTML template
 ```
 
-## AI Integration
+## Core Features
+
+### Google My Business Integration
+
+1. **OAuth Flow**: Users connect their Google account with business.manage scope
+2. **Account Selection**: Choose from accessible Google Business accounts
+3. **Location Management**: View and manage reviews for all business locations
+4. **Automatic Sync**: Background jobs keep reviews updated
+
+### AI Response Generation
 
 ReviewAI Pro uses Google Vertex AI for intelligent response generation:
 
-1. **Setup Vertex AI**: See [docs/vertex-ai-integration.md](docs/vertex-ai-integration.md)
-2. **Configure Models**: Update `src/lib/config/gemini-models.json`
-3. **Test Integration**: Visit `/account/ai-demo` when logged in
+1. **Setup**: See [docs/vertex-ai-integration.md](docs/vertex-ai-integration.md)
+2. **Models**: Configurable Gemini models in `src/lib/config/gemini-models.json`
+3. **API Endpoints**:
+   - `POST /api/reviews/generate` - Generate AI responses
+   - `POST /account/api/reviews` - Fetch reviews from Google
+   - `GET /account/api/reviews/sync` - Manual sync trigger
 
-### API Endpoints
+### Background Sync
 
-- `POST /api/reviews/generate` - Generate AI responses
-  - Supports streaming and non-streaming modes
-  - Requires authentication
+Automated review syncing keeps your database current:
+
+1. **Vercel Cron**: Runs every 6 hours (configurable)
+2. **Token Management**: Automatic refresh of expired OAuth tokens
+3. **Error Handling**: Graceful failure recovery
+4. **Monitoring**: Detailed sync status reporting
+
+See [BACKGROUND_SYNC_SETUP.md](BACKGROUND_SYNC_SETUP.md) for details.
 
 ## Contributing
 
@@ -191,6 +232,23 @@ We welcome contributions! Please see our [contributing guide](CONTRIBUTING.md) f
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## Database Schema
+
+Key tables for the review management system:
+
+- **organizations**: Multi-tenant organization management
+- **organization_members**: User-organization relationships
+- **reviews**: Imported reviews with platform metadata
+- **google_tokens**: Encrypted OAuth tokens for Google integration
+- **service_account_keys**: Vertex AI service account storage
+
+## Security
+
+- **Row-Level Security**: All tables protected with RLS policies
+- **Token Encryption**: OAuth tokens encrypted with AES-256-CBC
+- **Organization Isolation**: Users only access their organization's data
+- **Service Role**: Background jobs use separate authentication
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -201,8 +259,9 @@ Built on top of the excellent [CMSaasStarter](https://github.com/CriticalMoments
 
 ## Support
 
-- Documentation: [docs.reviewaipro.com](https://docs.reviewaipro.com)
-- Email: support@reviewaipro.com
+- Documentation: See `/docs` directory
+- Setup Guide: [COMPLETE_SETUP_GUIDE.md](COMPLETE_SETUP_GUIDE.md)
+- Background Sync: [BACKGROUND_SYNC_SETUP.md](BACKGROUND_SYNC_SETUP.md)
 - Issues: [GitHub Issues](https://github.com/reviewaipro/reviewaipro/issues)
 
 ---

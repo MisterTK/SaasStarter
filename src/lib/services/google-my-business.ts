@@ -7,7 +7,10 @@ export interface GoogleToken {
 interface BusinessLocation {
   name: string
   locationId: string
-  address: string
+  title?: string
+  address?: {
+    addressLines?: string[]
+  } | string
   primaryPhone?: string
   websiteUrl?: string
 }
@@ -22,7 +25,8 @@ interface BusinessAccount {
 }
 
 interface Review {
-  reviewId: string
+  reviewId?: string
+  name?: string  // Google's resource name format (e.g., accounts/123/locations/456/reviews/789)
   reviewer: {
     displayName: string
     profilePhotoUrl?: string
@@ -35,7 +39,21 @@ interface Review {
     comment: string
     updateTime: string
   }
-  locationName: string
+  locationName?: string
+}
+
+interface Invitation {
+  name: string
+  targetAccount?: {
+    accountName: string
+    email?: string
+  }
+  targetLocation?: {
+    locationName: string
+    address?: string
+  }
+  role: string
+  state: string
 }
 
 const GOOGLE_MY_BUSINESS_API =
@@ -144,6 +162,76 @@ export class GoogleMyBusinessService {
 
     const data = await response.json()
     return data.locations || []
+  }
+
+  async getInvitations(): Promise<Invitation[]> {
+    // Note: The invitations endpoint doesn't require an account ID
+    // It returns all invitations for the authenticated user
+    const response = await this.makeRequest(
+      `${GOOGLE_MY_BUSINESS_ACCOUNT_MANAGEMENT_API}/invitations`,
+    )
+
+    if (!response.ok) {
+      console.error("Failed to fetch invitations:", await response.text())
+      return []
+    }
+
+    const data = await response.json()
+    return data.invitations || []
+  }
+
+  async acceptInvitation(invitationName: string): Promise<boolean> {
+    const response = await this.makeRequest(
+      `${GOOGLE_MY_BUSINESS_ACCOUNT_MANAGEMENT_API}/${invitationName}:accept`,
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      },
+    )
+
+    if (!response.ok) {
+      console.error("Failed to accept invitation:", await response.text())
+      return false
+    }
+
+    return true
+  }
+
+  // Get all locations the user has access to (including those without account access)
+  async getAllAccessibleLocations(): Promise<BusinessLocation[]> {
+    const allLocations: BusinessLocation[] = []
+    const locationIds = new Set<string>() // Track unique locations
+    
+    // First, get all locations from accounts we own or have access to
+    const accounts = await this.getAccounts()
+    for (const account of accounts) {
+      try {
+        const locations = await this.getLocations(account.accountId)
+        for (const location of locations) {
+          const locationId = location.name.split('/').pop() || location.locationId
+          if (!locationIds.has(locationId)) {
+            locationIds.add(locationId)
+            allLocations.push(location)
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to fetch locations for account ${account.accountId}:`, error)
+      }
+    }
+
+    // Check for any pending invitations that might give us access to additional locations
+    const invitations = await this.getInvitations()
+    console.log("Found invitations:", invitations)
+
+    // The invitations will show us locations we've been invited to but haven't accepted yet
+    // Once accepted, the locations will show up through the accounts above
+    
+    // Note: According to the API documentation, once you accept an invitation to a location,
+    // you'll have access to it through the associated account. The Google My Business API
+    // doesn't have a direct way to list "all locations I have admin access to" without
+    // going through accounts.
+
+    return allLocations
   }
 
   async getReviews(accountId: string, locationId: string): Promise<Review[]> {

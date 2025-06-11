@@ -1,6 +1,8 @@
 import { redirect } from "@sveltejs/kit"
 import type { PageServerLoad } from "./$types"
-import type { Tables } from "$lib/../DatabaseDefinitions"
+import type { Database } from "$lib/../DatabaseDefinitions"
+
+type Tables = Database['public']['Tables']
 
 export const load: PageServerLoad = async ({
   locals: { safeGetSession, supabaseServiceRole },
@@ -25,12 +27,14 @@ export const load: PageServerLoad = async ({
 
   // Store the current organization in cookies
   const currentOrg = orgMemberships.organizations
-  cookies.set("current_org_id", currentOrg.id, {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  })
+  if (currentOrg) {
+    cookies.set("current_org_id", currentOrg.id, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    })
+  }
 
   return {
     organization: currentOrg,

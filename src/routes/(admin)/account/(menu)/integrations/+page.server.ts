@@ -4,7 +4,7 @@ import crypto from "crypto"
 import { GoogleMyBusinessWrapper } from "$lib/services/google-my-business-wrapper"
 import { env as publicEnv } from "$env/dynamic/public"
 import { env as privateEnv } from "$env/dynamic/private"
-import { getAuthRedirectUrl } from "$lib/auth-redirect"
+import type { Json } from "$lib/../DatabaseDefinitions"
 
 // OAuth URLs are now handled by GoogleMyBusinessWrapper
 
@@ -95,13 +95,19 @@ export const load: PageServerLoad = async ({
   })
   const tokenValid = await gmb.hasValidToken(orgId)
   let businessAccounts = null
+  let accessibleLocations = null
+  let invitations = null
   
   if (tokenValid) {
     try {
       // Fetch actual business accounts from Google My Business API
       businessAccounts = await gmb.listAccounts(orgId)
+      // Also fetch all locations the user has access to (including shared locations)
+      accessibleLocations = await gmb.getAllAccessibleLocations(orgId)
+      // Fetch any pending invitations
+      invitations = await gmb.getInvitations(orgId)
     } catch (err) {
-      console.error("Error fetching business accounts:", err)
+      console.error("Error fetching business data:", err)
       // Token might be invalid, don't throw error but show as disconnected
     }
   }
@@ -109,7 +115,10 @@ export const load: PageServerLoad = async ({
   return {
     googleConnected: tokenValid,
     businessAccounts,
-    success: url.searchParams.get("success") === "true"
+    accessibleLocations,
+    invitations,
+    success: url.searchParams.get("success") === "true",
+    successType: url.searchParams.get("success") // This will be "true" or "invitation-accepted"
   }
 }
 
@@ -161,6 +170,117 @@ export const actions: Actions = {
     } catch (error) {
       console.error("Error disconnecting Google:", error)
       return fail(500, { error: "Failed to disconnect Google account" })
+    }
+  },
+
+  acceptInvitation: async ({
+    locals: { safeGetSession, supabaseServiceRole },
+    cookies,
+    request,
+  }) => {
+    const { user } = await safeGetSession()
+    if (!user) {
+      return fail(401, { error: "Unauthorized" })
+    }
+
+    const orgId = cookies.get("current_org_id")
+    if (!orgId) {
+      return fail(400, { error: "No organization selected" })
+    }
+
+    const formData = await request.formData()
+    const invitationName = formData.get("invitationName") as string
+
+    if (!invitationName) {
+      return fail(400, { error: "No invitation specified" })
+    }
+
+    try {
+      const gmb = new GoogleMyBusinessWrapper(supabaseServiceRole, {
+        clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
+        clientSecret: privateEnv.GOOGLE_CLIENT_SECRET,
+        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
+      })
+      const success = await gmb.acceptInvitation(orgId, invitationName)
+      
+      if (success) {
+        redirect(303, "/account/integrations?success=invitation-accepted")
+      } else {
+        return fail(500, { error: "Failed to accept invitation" })
+      }
+    } catch (error) {
+      console.error("Error accepting invitation:", error)
+      return fail(500, { error: "Failed to accept invitation" })
+    }
+  },
+
+  importReviews: async ({
+    locals: { safeGetSession, supabaseServiceRole },
+    cookies,
+    request,
+  }) => {
+    const { user } = await safeGetSession()
+    if (!user) {
+      return fail(401, { error: "Unauthorized" })
+    }
+
+    const orgId = cookies.get("current_org_id")
+    if (!orgId) {
+      return fail(400, { error: "No organization selected" })
+    }
+
+    const formData = await request.formData()
+    const accountId = formData.get("accountId") as string
+    const locationId = formData.get("locationId") as string
+    const locationName = formData.get("locationName") as string
+
+    if (!accountId || !locationId) {
+      return fail(400, { error: "Missing account or location information" })
+    }
+
+    try {
+      const gmb = new GoogleMyBusinessWrapper(supabaseServiceRole, {
+        clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
+        clientSecret: privateEnv.GOOGLE_CLIENT_SECRET,
+        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
+      })
+
+      const reviews = await gmb.getReviews(orgId, accountId, locationId)
+
+      // Store reviews in database
+      let importedCount = 0
+      for (const review of reviews) {
+        const reviewId = review.reviewId || review.name?.split('/').pop() || ''
+        
+        const { error } = await supabaseServiceRole
+          .from('reviews')
+          .upsert({
+            organization_id: orgId,
+            platform: 'google',
+            platform_review_id: reviewId,
+            location_id: locationId,
+            location_name: locationName || locationId,
+            reviewer_name: review.reviewer?.displayName || 'Anonymous',
+            reviewer_avatar_url: review.reviewer?.profilePhotoUrl,
+            rating: parseInt(review.starRating || '0'),
+            review_text: review.comment,
+            review_reply: review.reviewReply?.comment,
+            reviewed_at: review.createTime,
+            reply_updated_at: review.reviewReply?.updateTime,
+            raw_data: JSON.parse(JSON.stringify(review)) as Json
+          })
+
+        if (!error) {
+          importedCount++
+        } else {
+          console.error('Error storing review:', error)
+        }
+      }
+
+      redirect(303, `/account/reviews?imported=${importedCount}`)
+    } catch (error) {
+      console.error("Error importing reviews:", error)
+      return fail(500, { error: "Failed to import reviews" })
     }
   },
 }

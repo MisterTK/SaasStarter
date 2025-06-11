@@ -29,12 +29,15 @@ npm run test_run        # Run tests once
 
 ## Architecture Overview
 
-This is a **SvelteKit** SaaS starter template with the following architecture:
+ReviewAI Pro is a **SvelteKit** application for AI-powered review management with the following architecture:
 
 ### Tech Stack
 
 - **Frontend**: SvelteKit with Svelte 5, TypeScript, Tailwind CSS v4, DaisyUI
 - **Backend**: Supabase (Auth, PostgreSQL with RLS, Storage)
+- **AI Integration**: Google Vertex AI with Vercel AI SDK for streaming
+- **Review Platform**: Google My Business API with OAuth 2.0
+- **Background Jobs**: Vercel Cron or Supabase Edge Functions
 - **Payments**: Stripe (Checkout, Subscriptions, Customer Portal)
 - **Email**: Handlebars templates + Resend API
 - **Search**: Pre-built Fuse.js index generated at build time
@@ -45,8 +48,14 @@ This is a **SvelteKit** SaaS starter template with the following architecture:
   - Homepage, pricing, blog, login/signup, contact
   - SEO optimized with sitemap.xml and RSS feed
 - `/(admin)/` - Authenticated user area
-  - Account dashboard, billing, settings, API endpoints
+  - Account dashboard, billing, settings
+  - Reviews management with AI response generation
+  - Google My Business integration
+  - Organization management
   - Protected by server-side auth checks
+- `/api/` - API endpoints
+  - Review generation and sync
+  - Cron jobs for background tasks
 
 ### Key Patterns
 
@@ -59,9 +68,14 @@ This is a **SvelteKit** SaaS starter template with the following architecture:
 
 #### Database Schema
 
-- `profiles` table with RLS for user data
-- `stripe_customers` for payment mapping
-- `contact_requests` for form submissions
+- `profiles` - User profiles with RLS
+- `organizations` - Multi-tenant organization data
+- `organization_members` - User-organization relationships
+- `reviews` - Imported reviews from various platforms
+- `google_tokens` - Encrypted OAuth tokens
+- `service_account_keys` - Vertex AI credentials
+- `stripe_customers` - Payment mapping
+- `contact_requests` - Form submissions
 - Migrations in `supabase/migrations/`
 
 #### Subscription Management
@@ -81,12 +95,25 @@ This is a **SvelteKit** SaaS starter template with the following architecture:
 Required for development and production:
 
 ```
+# Supabase
 PUBLIC_SUPABASE_URL
 PUBLIC_SUPABASE_ANON_KEY
 PRIVATE_SUPABASE_SERVICE_ROLE
-PRIVATE_STRIPE_API_KEY
-PRIVATE_RESEND_API_KEY         # Optional - for sending emails
-PRIVATE_ADMIN_EMAIL           # Optional - admin notifications
+
+# Google OAuth (for My Business integration)
+PUBLIC_GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+
+# Vertex AI
+GOOGLE_CLOUD_PROJECT
+GOOGLE_CLOUD_LOCATION           # Optional - defaults to us-central1
+GOOGLE_APPLICATION_CREDENTIALS  # Path to service account JSON
+
+# Optional Services
+PRIVATE_STRIPE_API_KEY         # For payments
+PRIVATE_RESEND_API_KEY         # For sending emails
+PRIVATE_ADMIN_EMAIL           # Admin notifications
+CRON_SECRET                   # For background sync authentication
 ```
 
 ## Common Tasks
@@ -103,6 +130,8 @@ PRIVATE_ADMIN_EMAIL           # Optional - admin notifications
 - Use Supabase dashboard SQL editor for schema changes
 - Add RLS policies for security
 - Use service role client only in server-side code (+page.server.ts)
+- Organization-scoped queries use `getUserOrganization()` helper
+- Token encryption/decryption handled automatically by services
 
 ### Modifying Subscription Plans
 
@@ -122,34 +151,40 @@ PRIVATE_ADMIN_EMAIL           # Optional - admin notifications
 - Test card: 4242 4242 4242 4242
 - Webhook testing requires Stripe CLI or live deployment
 
-## Google Vertex AI Integration
+## Key Integrations
 
-This project includes integration with Google Vertex AI for automated review response generation using the Vercel AI SDK.
+### Google Vertex AI
 
-### Setup
+AI-powered review response generation using Google's Gemini models:
 
-1. Set environment variables:
+- **Service**: `ResponseGeneratorService` with streaming support
+- **Models**: Configurable in `/src/lib/config/gemini-models.json`
+- **Endpoint**: `POST /api/reviews/generate`
+- **Demo**: `/account/ai-demo` page
 
-   ```
-   GOOGLE_CLOUD_PROJECT=your-project-id
-   GOOGLE_CLOUD_LOCATION=us-central1  # optional
-   GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json  # optional for local dev
-   ```
+### Google My Business
 
-2. Enable Vertex AI API in your GCP project
+OAuth-based integration for review management:
 
-3. Configure authentication (see docs/vertex-ai-integration.md)
+- **Service**: `GoogleMyBusinessService` with automatic token refresh
+- **Token Storage**: Encrypted in `google_tokens` table
+- **Endpoints**:
+  - `POST /account/api/reviews` - Fetch reviews
+  - `GET /account/api/reviews/sync` - Manual sync
+  - `POST /api/cron/sync-reviews` - Background sync
 
-### API Endpoints
+### Background Sync
 
-- `POST /account/api/reviews/generate` - Generate AI responses to reviews
-  - Supports both streaming and non-streaming responses
-  - Requires authentication
+Automated review syncing:
 
-### Key Files
+- **Vercel Cron**: Configured in `vercel.json`
+- **Schedule**: Every 6 hours (configurable)
+- **Security**: Protected by `CRON_SECRET`
+- **Monitoring**: Returns sync status and statistics
 
-- `/src/lib/services/ai/` - AI service implementations
-- `/src/lib/config/gemini-models.json` - Model configuration (update this when new models are released)
-- `/src/routes/(admin)/api/reviews/generate/` - API endpoint
-- `/src/lib/components/ReviewResponseGenerator.svelte` - Demo component
-- `/src/routes/(admin)/account/ai-demo/` - Demo page
+## Security Patterns
+
+- **Organization Isolation**: All queries scoped to user's organization
+- **Token Encryption**: OAuth tokens encrypted with AES-256-CBC
+- **RLS Policies**: Database-level security for all tables
+- **Service Role**: Background jobs use separate authentication
