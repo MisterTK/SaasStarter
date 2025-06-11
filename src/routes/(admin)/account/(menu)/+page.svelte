@@ -1,7 +1,9 @@
 <script lang="ts">
   import { getContext } from "svelte"
   import type { Writable } from "svelte/store"
+  import type { PageData } from './$types'
 
+  let { data }: { data: PageData } = $props()
   let adminSection: Writable<string> = getContext("adminSection")
   adminSection.set("home")
 </script>
@@ -11,32 +13,51 @@
 </svelte:head>
 
 <h1 class="text-2xl font-bold mb-1">Dashboard</h1>
-<div class="alert alert-error max-w-lg mt-2">
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    class="stroke-current shrink-0 h-6 w-6"
-    fill="none"
-    viewBox="0 0 24 24"
-    ><path
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      stroke-width="2"
-      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-    /></svg
-  >
-  <div>
-    <div class="font-bold">Demo Content</div>
-    <div class="my-2">
-      This page is just a placeholder. Replace this page with your app's content
-      and functionality.
-    </div>
-    <div class="my-2">
-      The <a href="/account/billing" class="link">billing</a> and
-      <a href="/account/settings" class="link">settings</a> pages are functional
-      demos.
+
+{#if data.organization}
+  <div class="mb-6">
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title">Organization Details</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm text-gray-600">Organization Name</p>
+            <p class="font-semibold">{data.organization.name}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">Your Role</p>
+            <p class="font-semibold capitalize">{data.userRole}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">Organization URL</p>
+            <p class="font-semibold">{data.organization.slug}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">Status</p>
+            <div class="badge badge-success">Active</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+
+  <div class="alert alert-info max-w-2xl">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <div>
+      <h3 class="font-bold">Getting Started</h3>
+      <div class="text-sm">
+        <p>Welcome to your Reviews Dashboard! Here are your next steps:</p>
+        <ol class="list-decimal list-inside mt-2">
+          <li>Connect your Google My Business account</li>
+          <li>Import your existing reviews</li>
+          <li>Set up AI response templates</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <div class="my-6">
   <h1 class="text-xl font-bold mb-1">Users</h1>
