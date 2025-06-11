@@ -71,6 +71,11 @@ export const load: PageServerLoad = async ({
       // Redirect to clear URL parameters and show success
       redirect(303, "/account/integrations?success=true")
     } catch (err) {
+      // Re-throw redirects (they're not errors)
+      if (err && typeof err === 'object' && 'status' in err && 'location' in err) {
+        throw err
+      }
+      
       console.error("Error exchanging OAuth code:", err)
       // Clear state cookie on error
       cookies.delete("google_oauth_state", { path: "/" })
