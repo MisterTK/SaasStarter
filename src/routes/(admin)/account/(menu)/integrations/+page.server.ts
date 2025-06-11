@@ -245,7 +245,21 @@ export const actions: Actions = {
         encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
       })
 
-      const reviews = await gmb.getReviews(orgId, accountId, locationId)
+      // Construct the full location name for the API call
+      const fullLocationName = `accounts/${accountId}/locations/${locationId}`
+      const reviews = await gmb.getReviewsByLocationName(orgId, fullLocationName)
+
+      // Helper to convert star rating string to number
+      const starRatingToNumber = (rating: string): number => {
+        const ratingMap: Record<string, number> = {
+          'ONE': 1,
+          'TWO': 2,
+          'THREE': 3,
+          'FOUR': 4,
+          'FIVE': 5
+        }
+        return ratingMap[rating] || 0
+      }
 
       // Store reviews in database
       let importedCount = 0
@@ -262,7 +276,7 @@ export const actions: Actions = {
             location_name: locationName || locationId,
             reviewer_name: review.reviewer?.displayName || 'Anonymous',
             reviewer_avatar_url: review.reviewer?.profilePhotoUrl,
-            rating: parseInt(review.starRating || '0'),
+            rating: starRatingToNumber(review.starRating),
             review_text: review.comment,
             review_reply: review.reviewReply?.comment,
             reviewed_at: review.createTime,

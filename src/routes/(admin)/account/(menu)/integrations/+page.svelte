@@ -2,10 +2,13 @@
   import { getContext } from "svelte"
   import type { Writable } from "svelte/store"
   import type { PageData } from "./$types"
+  import { enhance } from "$app/forms"
 
   let { data }: { data: PageData } = $props()
   let adminSection: Writable<string> = getContext("adminSection")
   adminSection.set("integrations")
+  
+  let importingLocation = $state<string | null>(null)
 </script>
 
 <svelte:head>
@@ -192,11 +195,32 @@
                       <div class="text-xs text-gray-500">{location.primaryPhone}</div>
                     {/if}
                   </div>
-                  <form method="POST" action="?/importReviews">
+                  <form 
+                    method="POST" 
+                    action="?/importReviews"
+                    use:enhance={() => {
+                      importingLocation = location.name
+                      return async ({ update }) => {
+                        await update()
+                        importingLocation = null
+                      }
+                    }}
+                  >
                     <input type="hidden" name="accountId" value={location.name.split('/')[1]} />
                     <input type="hidden" name="locationId" value={location.name.split('/')[3] || location.locationId} />
                     <input type="hidden" name="locationName" value={location.title || location.name} />
-                    <button type="submit" class="btn btn-xs btn-primary">Import Reviews</button>
+                    <button 
+                      type="submit" 
+                      class="btn btn-xs btn-primary"
+                      disabled={importingLocation === location.name}
+                    >
+                      {#if importingLocation === location.name}
+                        <span class="loading loading-spinner loading-xs"></span>
+                        Importing...
+                      {:else}
+                        Import Reviews
+                      {/if}
+                    </button>
                   </form>
                 </div>
               {/each}
