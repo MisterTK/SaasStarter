@@ -122,6 +122,8 @@ export class GoogleMyBusinessWrapper {
         access_token: encryptedAccessToken,
         refresh_token: encryptedRefreshToken,
         expires_at: expiresAt.toISOString(),
+      }, {
+        onConflict: 'organization_id,user_id'
       });
 
     if (error) {
