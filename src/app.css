@@ -7,34 +7,35 @@
 }
 
 @plugin "daisyui/theme" {
-  name: "saasstartertheme";
+  name: "aptlysaidtheme";
   default: true; /* set as default */
   prefersdark: false; /* set as default dark mode (prefers-color-scheme:dark) */
   color-scheme: light; /* color of browser-provided UI */
 
-  --color-primary: #180042;
-  --color-primary-content: #fefbf6;
-  --color-secondary: #c7b9f8;
-  --color-secondary-content: oklch(95% 0 0);
-  --color-accent: #db2777;
-  --color-accent-content: #180042;
-  --color-neutral: #180042;
-  --color-neutral-content: #fefbf6;
-  --color-base-100: #fefbf6;
-  --color-base-200: #faedd6;
-  --color-base-300: oklch(92% 0.04 240);
-  --color-base-content: #180042;
-  --color-info: oklch(70% 0.2 220);
-  --color-info-content: oklch(98% 0.01 220);
-  --color-success: #37d399;
-  --color-success-content: oklch(98% 0.01 140);
-  --color-warning: oklch(80% 0.25 80);
-  --color-warning-content: oklch(20% 0.05 80);
-  --color-error: #f77272;
-  --color-error-content: oklch(98% 0.01 30);
+  /* AptlySaid Brand Colors */
+  --color-primary: #1A2A4F; /* Deep Navy Blue */
+  --color-primary-content: #F8F9FA; /* Off-White for text on primary */
+  --color-secondary: #F8F9FA; /* Crisp Off-White */
+  --color-secondary-content: #1A2A4F; /* Navy for text on secondary */
+  --color-accent: #C5B358; /* Sophisticated Muted Gold */
+  --color-accent-content: #1A2A4F; /* Navy for text on accent */
+  --color-neutral: #848A96; /* Neutral Grey */
+  --color-neutral-content: #F8F9FA; /* Off-White for text on neutral */
+  --color-base-100: #F8F9FA; /* Off-White background */
+  --color-base-200: #EBEDEF; /* Slightly darker off-white */
+  --color-base-300: #DDE1E6; /* Even darker off-white */
+  --color-base-content: #1A2A4F; /* Navy text on base */
+  --color-info: #3B82F6; /* Blue for info */
+  --color-info-content: #F8F9FA; /* White text on info */
+  --color-success: #10B981; /* Green for success */
+  --color-success-content: #F8F9FA; /* White text on success */
+  --color-warning: #F59E0B; /* Amber for warning */
+  --color-warning-content: #1A2A4F; /* Dark text on warning */
+  --color-error: #EF4444; /* Red for error */
+  --color-error-content: #F8F9FA; /* White text on error */
 
   /* border radius */
-  --radius-selector: 1rem;
+  --radius-selector: 0.75rem;
   --radius-field: 0.5rem;
   --radius-box: 0.5rem;
 
@@ -65,7 +66,18 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    border-color: var(--color-base-300, currentColor);
+  }
+}
+
+/* Typography Styles */
+@layer base {
+  h1, h2 {
+    font-family: 'Lora', 'Playfair Display', Georgia, serif;
+  }
+  
+  body, p, button, input, select, textarea {
+    font-family: 'Inter', 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 }
 

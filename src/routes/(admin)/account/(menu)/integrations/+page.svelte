@@ -381,55 +381,69 @@
                       </div>
                     {/if}
                   </div>
-                  <form
-                    method="POST"
-                    action="?/importReviews"
-                    use:enhance={() => {
-                      importingLocation = location.name
-                      return async ({ result, update }) => {
-                        if (result.type === "redirect") {
-                          // Handle redirect manually to prevent form resubmission
-                          await update({ reset: false })
-                          importingLocation = null
-                          // Use goto for client-side navigation
-                          goto(result.location)
-                        } else {
-                          await update()
-                          importingLocation = null
+                  {@const locationId = location.name.includes('accounts/') && location.name.includes('locations/') 
+                    ? location.name.split("/")[3] 
+                    : (location.locationId || location.name.replace('locations/', ''))}
+                  {@const reviewCount = data.locationReviewCounts?.[locationId] || 0}
+                  
+                  {#if reviewCount > 0}
+                    <div class="text-right">
+                      <div class="badge badge-success badge-sm">
+                        {reviewCount} reviews synced
+                      </div>
+                      <div class="text-xs text-gray-500 mt-1">
+                        Auto-syncing hourly
+                      </div>
+                    </div>
+                  {:else}
+                    <form
+                      method="POST"
+                      action="?/importReviews"
+                      use:enhance={() => {
+                        importingLocation = location.name
+                        return async ({ result, update }) => {
+                          if (result.type === "redirect") {
+                            // Handle redirect manually to prevent form resubmission
+                            await update({ reset: false })
+                            importingLocation = null
+                            // Use goto for client-side navigation
+                            goto(result.location)
+                          } else {
+                            await update()
+                            importingLocation = null
+                          }
                         }
-                      }
-                    }}
-                  >
-                    <input
-                      type="hidden"
-                      name="accountId"
-                      value={location.name.includes('accounts/') ? location.name.split("/")[1] : '-'}
-                    />
-                    <input
-                      type="hidden"
-                      name="locationId"
-                      value={location.name.includes('accounts/') && location.name.includes('locations/') 
-                        ? location.name.split("/")[3] 
-                        : (location.locationId || location.name.replace('locations/', ''))}
-                    />
-                    <input
-                      type="hidden"
-                      name="locationName"
-                      value={location.title || location.name}
-                    />
-                    <button
-                      type="submit"
-                      class="btn btn-xs btn-primary"
-                      disabled={importingLocation === location.name}
+                      }}
                     >
-                      {#if importingLocation === location.name}
-                        <span class="loading loading-spinner loading-xs"></span>
-                        Importing...
-                      {:else}
-                        Import Reviews
-                      {/if}
-                    </button>
-                  </form>
+                      <input
+                        type="hidden"
+                        name="accountId"
+                        value={location.name.includes('accounts/') ? location.name.split("/")[1] : '-'}
+                      />
+                      <input
+                        type="hidden"
+                        name="locationId"
+                        value={locationId}
+                      />
+                      <input
+                        type="hidden"
+                        name="locationName"
+                        value={location.title || location.name}
+                      />
+                      <button
+                        type="submit"
+                        class="btn btn-xs btn-primary"
+                        disabled={importingLocation === location.name}
+                      >
+                        {#if importingLocation === location.name}
+                          <span class="loading loading-spinner loading-xs"></span>
+                          Importing...
+                        {:else}
+                          Initial Sync
+                        {/if}
+                      </button>
+                    </form>
+                  {/if}
                 </div>
               {/each}
             </div>

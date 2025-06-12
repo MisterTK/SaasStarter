@@ -13,7 +13,12 @@
   let { children }: Props = $props()
 </script>
 
-<div class="min-h-screen bg-gray-50 flex flex-col">
+<svelte:head>
+  <title>AptlySaid - Your brand's voice, perfected</title>
+  <meta name="description" content="AI-powered review response management platform that generates professional, on-brand responses to customer reviews across all platforms." />
+</svelte:head>
+
+<div class="min-h-screen bg-base-100 flex flex-col">
   <Header />
   
   {#if $navigating}
@@ -25,13 +30,12 @@
          while slow networks see it moving for a full 12 seconds
     -->
     <div
-      class="fixed w-full top-0 right-0 left-0 h-1 z-50"
-      style="background-color: #00aae6;"
+      class="fixed w-full top-0 right-0 left-0 h-1 z-50 bg-accent"
       in:slide={{ delay: 100, duration: 12000, axis: "x", easing: expoOut }}
     ></div>
   {/if}
   
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+  <main class="flex-1">
     {@render children?.()}
   </main>
   

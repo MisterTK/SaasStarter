@@ -285,11 +285,28 @@ export const load: PageServerLoad = async ({
     }
   }
 
+  // Get review counts for each location to show sync status
+  let locationReviewCounts: Record<string, number> = {}
+  if (tokenValid) {
+    const { data: reviewCounts } = await supabaseServiceRole
+      .from("reviews")
+      .select("location_id")
+      .eq("organization_id", orgId)
+
+    if (reviewCounts) {
+      locationReviewCounts = reviewCounts.reduce((acc, review) => {
+        acc[review.location_id] = (acc[review.location_id] || 0) + 1
+        return acc
+      }, {} as Record<string, number>)
+    }
+  }
+
   return {
     googleConnected: tokenValid,
     businessAccounts,
     accessibleLocations,
     invitations,
+    locationReviewCounts,
     success: url.searchParams.get("success") === "true",
     successType: url.searchParams.get("success"), // This will be "true" or "invitation-accepted"
     debugInfo,

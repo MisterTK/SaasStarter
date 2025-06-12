@@ -1,5 +1,5 @@
-export const WebsiteName: string = "WellSaid"
-export const WebsiteBaseUrl: string = "https://reviewaipro.com"
+export const WebsiteName: string = "AptlySaid"
+export const WebsiteBaseUrl: string = "https://aptlysaid.com"
 export const WebsiteDescription: string =
-  "AI-powered review response management platform. Generate professional responses to customer reviews across all platforms with AI assistance. Save time and improve customer satisfaction."
+  "Your brand's voice, perfected. AI-powered review response management platform that generates professional, on-brand responses to customer reviews across all platforms."
 export const CreateProfileStep: boolean = true
