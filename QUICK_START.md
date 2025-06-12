@@ -101,12 +101,12 @@ vercel
 
 ## Common Issues
 
-| Issue | Solution |
-|-------|----------|
-| OAuth redirect mismatch | Ensure exact URI match including trailing slashes |
-| Vertex AI permission denied | Check service account has aiplatform.user role |
-| No reviews showing | Verify Google account has business.manage scope |
-| Build failures | Run `npm run check` to find TypeScript errors |
+| Issue                       | Solution                                          |
+| --------------------------- | ------------------------------------------------- |
+| OAuth redirect mismatch     | Ensure exact URI match including trailing slashes |
+| Vertex AI permission denied | Check service account has aiplatform.user role    |
+| No reviews showing          | Verify Google account has business.manage scope   |
+| Build failures              | Run `npm run check` to find TypeScript errors     |
 
 ## Project Structure
 
@@ -133,6 +133,7 @@ src/
 5. Set up backup strategy
 
 For detailed documentation, see:
+
 - [Complete Setup Guide](COMPLETE_SETUP_GUIDE.md)
 - [Environment Variables](ENVIRONMENT_VARIABLES.md)
 - [Database Schema](DATABASE_SCHEMA.md)

@@ -43,11 +43,11 @@ GOOGLE_CLOUD_PROJECT=
 
 # The region for Vertex AI operations
 # Default: us-central1
-# Options: us-central1, us-east1, us-east4, us-south1, us-west1, us-west2, us-west3, us-west4, 
+# Options: us-central1, us-east1, us-east4, us-south1, us-west1, us-west2, us-west3, us-west4,
 #          northamerica-northeast1, northamerica-northeast2, southamerica-east1, southamerica-west1,
-#          europe-central2, europe-north1, europe-southwest1, europe-west1, europe-west2, 
+#          europe-central2, europe-north1, europe-southwest1, europe-west1, europe-west2,
 #          europe-west3, europe-west4, europe-west6, europe-west8, europe-west9,
-#          africa-south1, asia-east1, asia-east2, asia-northeast1, asia-northeast3, 
+#          africa-south1, asia-east1, asia-east2, asia-northeast1, asia-northeast3,
 #          asia-south1, asia-southeast1, asia-southeast2, australia-southeast1, australia-southeast2,
 #          me-central1, me-central2, me-west1
 GOOGLE_CLOUD_LOCATION=us-central1
@@ -164,15 +164,18 @@ PRODUCTION_URL=https://your-app.com
 ### Common Issues
 
 1. **"Invalid API key" errors**
+
    - Verify the key is correct and active
    - Check you're using the right environment's keys
    - Ensure the key has necessary permissions
 
 2. **"CORS error" with Supabase**
+
    - Check PUBLIC_SUPABASE_URL doesn't have trailing slash
    - Verify redirect URLs in Supabase auth settings
 
 3. **"Permission denied" from Vertex AI**
+
    - Ensure service account has "Vertex AI User" role
    - Check project has billing enabled
    - Verify APIs are enabled in GCP
@@ -188,17 +191,17 @@ Add this to your app startup to validate required variables:
 
 ```typescript
 const requiredEnvVars = [
-  'PUBLIC_SUPABASE_URL',
-  'PUBLIC_SUPABASE_ANON_KEY',
-  'PRIVATE_SUPABASE_SERVICE_ROLE',
-  'PUBLIC_GOOGLE_CLIENT_ID',
-  'GOOGLE_CLIENT_SECRET',
-  'GOOGLE_CLOUD_PROJECT'
-];
+  "PUBLIC_SUPABASE_URL",
+  "PUBLIC_SUPABASE_ANON_KEY",
+  "PRIVATE_SUPABASE_SERVICE_ROLE",
+  "PUBLIC_GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
+  "GOOGLE_CLOUD_PROJECT",
+]
 
 for (const varName of requiredEnvVars) {
   if (!process.env[varName]) {
-    throw new Error(`Missing required environment variable: ${varName}`);
+    throw new Error(`Missing required environment variable: ${varName}`)
   }
 }
 ```

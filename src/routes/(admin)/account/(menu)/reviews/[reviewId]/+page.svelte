@@ -110,7 +110,7 @@
         <ReviewResponseGenerator
           review={{
             rating: getStarCount(data.review.starRating),
-            comment: data.review.comment || '',
+            comment: data.review.comment || "",
             customerName: data.review.reviewer.displayName,
             businessType: "restaurant",
           }}

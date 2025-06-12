@@ -3,8 +3,8 @@ import type { PageServerLoad, Actions } from "./$types"
 
 // Convert numeric rating to star rating string
 function ratingToStarString(rating: number): string {
-  const ratings = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE'];
-  return ratings[Math.min(Math.max(rating - 1, 0), 4)];
+  const ratings = ["ONE", "TWO", "THREE", "FOUR", "FIVE"]
+  return ratings[Math.min(Math.max(rating - 1, 0), 4)]
 }
 
 export const load: PageServerLoad = async ({
@@ -47,10 +47,12 @@ export const load: PageServerLoad = async ({
     comment: review.review_text,
     createTime: review.reviewed_at,
     updateTime: review.reviewed_at,
-    reviewReply: review.review_reply ? {
-      comment: review.review_reply,
-      updateTime: review.reply_updated_at || review.reviewed_at,
-    } : null,
+    reviewReply: review.review_reply
+      ? {
+          comment: review.review_reply,
+          updateTime: review.reply_updated_at || review.reviewed_at,
+        }
+      : null,
     locationName: review.location_name,
     // Store raw data for API calls
     rawData: review.raw_data,
@@ -65,7 +67,12 @@ export const load: PageServerLoad = async ({
 }
 
 export const actions: Actions = {
-  reply: async ({ request, params, locals: { safeGetSession, supabaseServiceRole }, cookies }) => {
+  reply: async ({
+    request,
+    params,
+    locals: { safeGetSession, supabaseServiceRole },
+    cookies,
+  }) => {
     const { user } = await safeGetSession()
     if (!user) {
       return fail(401, { error: "Unauthorized" })
@@ -97,21 +104,25 @@ export const actions: Actions = {
       }
 
       // Get the review name from raw data
-      const rawData = review.raw_data as any
+      const rawData = review.raw_data as { name?: string; reviewId?: string }
       const reviewName = rawData?.name || rawData?.reviewId
       if (!reviewName) {
-        return fail(400, { error: "Cannot reply to this review - missing review identifier" })
+        return fail(400, {
+          error: "Cannot reply to this review - missing review identifier",
+        })
       }
 
       // Send reply to Google My Business
-      const { GoogleMyBusinessWrapper } = await import("$lib/services/google-my-business-wrapper")
+      const { GoogleMyBusinessWrapper } = await import(
+        "$lib/services/google-my-business-wrapper"
+      )
       const { env: publicEnv } = await import("$env/dynamic/public")
       const { env: privateEnv } = await import("$env/dynamic/private")
-      
+
       const gmb = new GoogleMyBusinessWrapper(supabaseServiceRole, {
         clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
         clientSecret: privateEnv.GOOGLE_CLIENT_SECRET,
-        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
+        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY,
       })
 
       await gmb.replyToReviewByName(orgId, reviewName, replyText)

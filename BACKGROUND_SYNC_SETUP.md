@@ -5,6 +5,7 @@ The ReviewAI Pro platform includes support for automated background syncing of r
 ## How It Works
 
 1. **Token Storage**: OAuth tokens are stored encrypted in the database with:
+
    - Access tokens (auto-refresh when expired)
    - Refresh tokens (for getting new access tokens)
    - Expiration timestamps
@@ -26,13 +27,14 @@ The repository includes a pre-configured Vercel cron job that runs every 6 hours
   "crons": [
     {
       "path": "/api/cron/sync-reviews",
-      "schedule": "0 */6 * * *"  // Every 6 hours
+      "schedule": "0 */6 * * *" // Every 6 hours
     }
   ]
 }
 ```
 
 **Setup**:
+
 1. Set the `CRON_SECRET` environment variable in Vercel
 2. Deploy to Vercel
 3. The cron job will automatically start running
@@ -88,6 +90,7 @@ jobs:
 ## What Gets Synced
 
 The sync job:
+
 1. Fetches all organizations with connected Google accounts
 2. For each organization:
    - Gets all accessible locations (owned + shared)
@@ -99,11 +102,13 @@ The sync job:
 ## Monitoring
 
 ### Sync Status
+
 The sync endpoint returns:
+
 ```json
 {
   "success": true,
-  "synced": 3,  // Number of organizations processed
+  "synced": 3, // Number of organizations processed
   "results": [
     {
       "organization_id": "uuid",
@@ -116,11 +121,13 @@ The sync endpoint returns:
 ```
 
 ### Error Handling
+
 - Token refresh failures are logged but don't stop the sync
 - Individual location failures don't affect other locations
 - Organization failures don't affect other organizations
 
 ### Logs
+
 - Vercel: Check Function Logs in Vercel Dashboard
 - Supabase: Check Edge Function logs
 - Custom: Implement your own logging solution
@@ -135,21 +142,27 @@ The sync endpoint returns:
 ## Customization
 
 ### Change Sync Frequency
+
 Edit the cron schedule in `vercel.json` or your scheduler:
+
 - `0 * * * *` - Every hour
 - `0 */4 * * *` - Every 4 hours
 - `0 0 * * *` - Daily at midnight
 - `0 0 * * 1` - Weekly on Monday
 
 ### Filter What Gets Synced
+
 Modify `sync-unanswered-reviews.ts` to:
+
 - Only sync reviews from last X days
 - Only sync specific ratings
 - Skip locations with recent syncs
 - Add notification webhooks
 
 ### Add Notifications
+
 Extend the sync job to:
+
 - Send email alerts for new negative reviews
 - Post to Slack for unanswered reviews
 - Trigger AI response generation

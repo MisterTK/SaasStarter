@@ -5,9 +5,11 @@ To support authentication on Vercel preview deployments, you need to add the fol
 ## Required Redirect URLs
 
 1. **Production URL** (already configured):
+
    - `https://reviews-dusky.vercel.app/**`
 
 2. **Vercel Preview Deployments** (add this):
+
    - `https://*-mistertks-projects.vercel.app/**`
 
 3. **Local Development** (if not already added):
@@ -27,6 +29,7 @@ When users authenticate on a preview deployment (e.g., `reviews-git-develop-mist
 ## Dynamic Redirect Implementation
 
 The codebase now includes:
+
 - `src/lib/auth-redirect.ts` - Helper functions for dynamic redirect URLs
 - Updated login pages to use `window.location.origin` for redirects
 - Google OAuth integration that preserves the current domain

@@ -1,4 +1,5 @@
-import fetch, { RequestInit as NodeFetchRequestInit } from 'node-fetch'
+import fetch from "node-fetch"
+import type { RequestInit as NodeFetchRequestInit } from "node-fetch"
 
 export interface GoogleToken {
   access_token: string
@@ -10,9 +11,11 @@ interface BusinessLocation {
   name: string
   locationId: string
   title?: string
-  address?: {
-    addressLines?: string[]
-  } | string
+  address?:
+    | {
+        addressLines?: string[]
+      }
+    | string
   primaryPhone?: string
   websiteUrl?: string
 }
@@ -28,7 +31,7 @@ interface BusinessAccount {
 
 interface Review {
   reviewId?: string
-  name?: string  // Google's resource name format (e.g., accounts/123/locations/456/reviews/789)
+  name?: string // Google's resource name format (e.g., accounts/123/locations/456/reviews/789)
   reviewer: {
     displayName: string
     profilePhotoUrl?: string
@@ -74,7 +77,7 @@ export class GoogleMyBusinessServiceAlt {
     private credentials?: {
       clientId: string
       clientSecret: string
-    }
+    },
   ) {}
 
   private async makeRequest(url: string, options: NodeFetchRequestInit = {}) {
@@ -123,7 +126,10 @@ export class GoogleMyBusinessServiceAlt {
       throw new Error("Failed to refresh access token")
     }
 
-    const tokens = await tokenResponse.json() as { access_token: string; expires_in: number }
+    const tokens = (await tokenResponse.json()) as {
+      access_token: string
+      expires_in: number
+    }
     this.accessToken = tokens.access_token
 
     if (this.onTokenRefresh) {
@@ -145,7 +151,7 @@ export class GoogleMyBusinessServiceAlt {
       return []
     }
 
-    const data = await response.json() as { accounts?: BusinessAccount[] }
+    const data = (await response.json()) as { accounts?: BusinessAccount[] }
     return data.accounts || []
   }
 
@@ -162,7 +168,7 @@ export class GoogleMyBusinessServiceAlt {
       return []
     }
 
-    const data = await response.json() as { locations?: BusinessLocation[] }
+    const data = (await response.json()) as { locations?: BusinessLocation[] }
     return data.locations || []
   }
 
@@ -178,17 +184,20 @@ export class GoogleMyBusinessServiceAlt {
     )
 
     if (!response.ok) {
-      console.error("Failed to fetch locations with wildcard:", await response.text())
+      console.error(
+        "Failed to fetch locations with wildcard:",
+        await response.text(),
+      )
       return []
     }
 
-    const data = await response.json() as { locations?: BusinessLocation[] }
+    const data = (await response.json()) as { locations?: BusinessLocation[] }
     const locations = data.locations || []
-    
+
     // Process locations to ensure they have the expected structure
     return locations.map((location: BusinessLocation) => ({
       name: location.name,
-      locationId: location.name.split('/').pop() || '',
+      locationId: location.name.split("/").pop() || "",
       title: location.title,
       // These fields won't be available with the limited readMask, but we keep them for compatibility
       address: location.address,
@@ -201,10 +210,10 @@ export class GoogleMyBusinessServiceAlt {
     // The invitations endpoint requires listing through each account
     // We need to get all accounts first, then check invitations for each
     const allInvitations: Invitation[] = []
-    
+
     try {
       const accounts = await this.getAccounts()
-      
+
       for (const account of accounts) {
         try {
           const accountName = account.name || `accounts/${account.accountId}`
@@ -213,19 +222,27 @@ export class GoogleMyBusinessServiceAlt {
           )
 
           if (response.ok) {
-            const data = await response.json() as { invitations?: Invitation[] }
+            const data = (await response.json()) as {
+              invitations?: Invitation[]
+            }
             if (data.invitations) {
               allInvitations.push(...data.invitations)
             }
           } else {
             // Log but don't fail completely if one account fails
-            console.error(`Failed to fetch invitations for account ${accountName}:`, await response.text())
+            console.error(
+              `Failed to fetch invitations for account ${accountName}:`,
+              await response.text(),
+            )
           }
         } catch (err) {
-          console.error(`Error fetching invitations for account ${account.name}:`, err)
+          console.error(
+            `Error fetching invitations for account ${account.name}:`,
+            err,
+          )
         }
       }
-      
+
       return allInvitations
     } catch (error) {
       console.error("Failed to fetch accounts for invitations:", error)
@@ -256,40 +273,53 @@ export class GoogleMyBusinessServiceAlt {
       // Use the wildcard account approach to get ALL locations at once
       // This includes both account-owned locations AND directly shared locations
       const wildcardLocations = await this.getAllLocationsWithWildcard()
-      
+
       if (wildcardLocations.length > 0) {
-        console.log(`Found ${wildcardLocations.length} locations using wildcard approach`)
+        console.log(
+          `Found ${wildcardLocations.length} locations using wildcard approach`,
+        )
         return wildcardLocations
       }
-      
+
       // Fallback to the old approach if wildcard fails or returns no results
-      console.log("Wildcard approach returned no locations, falling back to account-based approach")
+      console.log(
+        "Wildcard approach returned no locations, falling back to account-based approach",
+      )
       return await this.getAllAccessibleLocationsViaAccounts()
     } catch (error) {
-      console.error("Failed to fetch locations with wildcard, falling back to account-based approach:", error)
+      console.error(
+        "Failed to fetch locations with wildcard, falling back to account-based approach:",
+        error,
+      )
       return await this.getAllAccessibleLocationsViaAccounts()
     }
   }
 
   // Legacy method that iterates through accounts - kept as fallback
-  private async getAllAccessibleLocationsViaAccounts(): Promise<BusinessLocation[]> {
+  private async getAllAccessibleLocationsViaAccounts(): Promise<
+    BusinessLocation[]
+  > {
     const allLocations: BusinessLocation[] = []
     const locationIds = new Set<string>() // Track unique locations
-    
+
     // Get all locations from accounts we own or have access to
     const accounts = await this.getAccounts()
     for (const account of accounts) {
       try {
         const locations = await this.getLocations(account.accountId)
         for (const location of locations) {
-          const locationId = location.name.split('/').pop() || location.locationId
+          const locationId =
+            location.name.split("/").pop() || location.locationId
           if (!locationIds.has(locationId)) {
             locationIds.add(locationId)
             allLocations.push(location)
           }
         }
       } catch (error) {
-        console.error(`Failed to fetch locations for account ${account.accountId}:`, error)
+        console.error(
+          `Failed to fetch locations for account ${account.accountId}:`,
+          error,
+        )
       }
     }
 
@@ -316,7 +346,7 @@ export class GoogleMyBusinessServiceAlt {
       return []
     }
 
-    const data = await response.json() as { reviews?: Review[] }
+    const data = (await response.json()) as { reviews?: Review[] }
     return data.reviews || []
   }
 
@@ -328,13 +358,16 @@ export class GoogleMyBusinessServiceAlt {
     )
 
     if (!response.ok) {
-      console.error("Failed to fetch reviews by location name:", await response.text())
+      console.error(
+        "Failed to fetch reviews by location name:",
+        await response.text(),
+      )
       return []
     }
 
-    const data = await response.json() as { reviews?: Review[] }
+    const data = (await response.json()) as { reviews?: Review[] }
     const reviews = data.reviews || []
-    
+
     // Add the location name to each review for context
     return reviews.map((review: Review) => ({
       ...review,
@@ -416,9 +449,7 @@ export class GoogleMyBusinessServiceAlt {
   }
 
   // Delete a review reply using the full review name (e.g., "accounts/123/locations/456/reviews/789")
-  async deleteReviewReplyByName(
-    reviewName: string,
-  ): Promise<boolean> {
+  async deleteReviewReplyByName(reviewName: string): Promise<boolean> {
     const response = await this.makeRequest(
       `${GOOGLE_MY_BUSINESS_API}/${reviewName}/reply`,
       {
@@ -427,7 +458,10 @@ export class GoogleMyBusinessServiceAlt {
     )
 
     if (!response.ok) {
-      console.error("Failed to delete review reply by name:", await response.text())
+      console.error(
+        "Failed to delete review reply by name:",
+        await response.text(),
+      )
       return false
     }
 
@@ -458,7 +492,10 @@ export class GoogleMyBusinessServiceAlt {
     )
 
     if (!response.ok) {
-      console.error("Failed to fetch business info by location name:", await response.text())
+      console.error(
+        "Failed to fetch business info by location name:",
+        await response.text(),
+      )
       return null
     }
 
@@ -466,7 +503,9 @@ export class GoogleMyBusinessServiceAlt {
   }
 
   // Get all reviews for all accessible locations
-  async getAllReviews(): Promise<{ location: BusinessLocation; reviews: Review[] }[]> {
+  async getAllReviews(): Promise<
+    { location: BusinessLocation; reviews: Review[] }[]
+  > {
     const locations = await this.getAllAccessibleLocations()
     const allReviews: { location: BusinessLocation; reviews: Review[] }[] = []
 
@@ -478,7 +517,10 @@ export class GoogleMyBusinessServiceAlt {
           reviews,
         })
       } catch (error) {
-        console.error(`Failed to fetch reviews for location ${location.name}:`, error)
+        console.error(
+          `Failed to fetch reviews for location ${location.name}:`,
+          error,
+        )
       }
     }
 

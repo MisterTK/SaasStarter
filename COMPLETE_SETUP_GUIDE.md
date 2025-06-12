@@ -43,6 +43,7 @@ pnpm install
 
 1. Go to SQL Editor in Supabase Dashboard
 2. Run each migration file in order:
+
    ```sql
    -- Run these in sequence:
    -- 1. supabase/migrations/20240730010101_initial.sql
@@ -51,6 +52,7 @@ pnpm install
    ```
 
 3. Additional tables needed (run this SQL):
+
    ```sql
    -- Organizations table
    CREATE TABLE organizations (
@@ -146,13 +148,13 @@ gcloud iam service-accounts keys create vertex-ai-key.json \
    - User Type: External
    - App name: ReviewAI Pro
    - Support email: your-email@example.com
-   - Authorized domains: 
+   - Authorized domains:
      - vercel.app
      - supabase.co
      - Your custom domain (if any)
    - Scopes to add:
      - openid
-     - email  
+     - email
      - profile
      - https://www.googleapis.com/auth/business.manage
    - Test users: Add your email for testing while in development
@@ -163,7 +165,7 @@ gcloud iam service-accounts keys create vertex-ai-key.json \
    - Name: ReviewAI Pro OAuth Client
    - Authorized JavaScript origins:
      - https://YOUR-PROJECT.supabase.co
-     - https://YOUR-APP.vercel.app  
+     - https://YOUR-APP.vercel.app
      - http://localhost:5173
      - http://localhost:54321 (Supabase local)
    - Authorized redirect URIs:
@@ -227,13 +229,14 @@ CRON_SECRET=your-random-secret-for-cron-jobs
 1. Install Vercel CLI: `npm i -g vercel`
 2. Link your project: `vercel link`
 3. Add environment variables:
+
    ```bash
    # Add each variable
    vercel env add PUBLIC_SUPABASE_URL
    vercel env add PUBLIC_SUPABASE_ANON_KEY
    vercel env add PRIVATE_SUPABASE_SERVICE_ROLE
    # ... add all variables
-   
+
    # For Vertex AI credentials, first encode the JSON:
    cat vertex-ai-key.json | base64 | tr -d '\n' > vertex-ai-key-base64.txt
    # Then add as GOOGLE_APPLICATION_CREDENTIALS_JSON
@@ -311,22 +314,26 @@ npm run dev
 ### Testing Checklist
 
 1. **Authentication Flow**:
+
    - Sign up with Google
    - Verify profile creation
    - Test sign out/sign in
 
 2. **Organization Setup**:
+
    - Create organization
    - Verify slug generation
    - Check organization switching
 
 3. **Google My Business Integration**:
+
    - Click "Connect Google Account"
    - Authorize with business.manage scope
    - Select a business account
    - Verify reviews import
 
 4. **AI Response Generation**:
+
    - Select a review
    - Click "Generate Response"
    - Test different tones/styles
@@ -342,7 +349,7 @@ npm run dev
 ### Essential Tasks
 
 - [ ] **Custom Domain**: Configure in Vercel settings
-- [ ] **Production Database**: 
+- [ ] **Production Database**:
   - Create production Supabase project
   - Run all migrations
   - Configure RLS policies
@@ -358,7 +365,7 @@ npm run dev
 
 ### Security & Monitoring
 
-- [ ] **Error Tracking**: 
+- [ ] **Error Tracking**:
   - Set up Sentry or similar
   - Configure error alerts
 - [ ] **Security**:
@@ -389,12 +396,14 @@ npm run dev
 ### Common Issues and Solutions
 
 #### Google OAuth "Redirect URI mismatch"
+
 - Exact match required including protocol and trailing slashes
 - Wait 5-10 minutes after adding new URIs
 - Clear browser cache and cookies
 - Check for whitespace in environment variables
 
 #### Vertex AI "Permission denied"
+
 ```bash
 # Verify service account permissions
 gcloud projects get-iam-policy reviews-app-prod \
@@ -406,18 +415,21 @@ gcloud services enable aiplatform.googleapis.com
 ```
 
 #### Supabase "Invalid API key"
+
 - Verify you're using anon key for client, service role for server
 - Check for trailing/leading whitespace
 - Ensure keys match the correct project
 - Regenerate keys if compromised
 
 #### "No reviews showing up"
+
 - Check Google My Business account has reviews
 - Verify OAuth token has business.manage scope
 - Check browser console for API errors
 - Try manual sync from integrations page
 
 #### Build Failures
+
 ```bash
 # Clear cache and reinstall
 rm -rf node_modules package-lock.json
@@ -431,17 +443,18 @@ npm run check
 ### Debug Mode
 
 Enable debug logging:
+
 ```typescript
 // In your code
 if (import.meta.env.DEV) {
-  console.log('Debug info:', data);
+  console.log("Debug info:", data)
 }
 ```
 
 ### Getting Help
 
 1. **Documentation**: Check `/docs` folder for detailed guides
-2. **Logs**: 
+2. **Logs**:
    - Vercel: Function logs in dashboard
    - Supabase: Logs explorer in dashboard
    - Browser: Console and Network tabs

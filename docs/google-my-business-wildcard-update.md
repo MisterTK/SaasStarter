@@ -21,6 +21,7 @@ Updated the Google My Business integration to support fetching locations using t
 ### 2. Updated `getAllAccessibleLocations()` Method
 
 The method now:
+
 1. First attempts to use the wildcard approach to get all locations
 2. Falls back to the legacy account-based approach if the wildcard fails
 3. Provides better error handling and logging
@@ -28,6 +29,7 @@ The method now:
 ### 3. Updates to Reviews Page
 
 The reviews page (`/account/reviews`) now uses the new wildcard approach to:
+
 - Fetch all accessible locations more efficiently
 - Group locations by account for display
 - Handle both owned and shared locations seamlessly
@@ -49,14 +51,17 @@ The reviews page (`/account/reviews`) now uses the new wildcard approach to:
 
 ```typescript
 // Create service instance
-const gmb = new GoogleMyBusinessService(accessToken, refreshToken);
+const gmb = new GoogleMyBusinessService(accessToken, refreshToken)
 
 // Get all locations (both owned and shared)
-const locations = await gmb.getAllAccessibleLocations();
+const locations = await gmb.getAllAccessibleLocations()
 
 // Get reviews for a location using its name
-const reviews = await gmb.getReviewsByLocationName("accounts/123/locations/456");
+const reviews = await gmb.getReviewsByLocationName("accounts/123/locations/456")
 
 // Reply to a review using its full name
-await gmb.replyToReviewByName("accounts/123/locations/456/reviews/789", "Thank you for your feedback!");
+await gmb.replyToReviewByName(
+  "accounts/123/locations/456/reviews/789",
+  "Thank you for your feedback!",
+)
 ```

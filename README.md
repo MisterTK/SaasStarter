@@ -66,7 +66,7 @@ Built on the robust foundation of CMSaasStarter with additional AI capabilities:
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - A Supabase account (free tier works)
 - Google Cloud account with:
   - Billing enabled
@@ -78,22 +78,26 @@ Built on the robust foundation of CMSaasStarter with additional AI capabilities:
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/reviewaipro/reviewaipro.git
 cd reviewaipro
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env.local
 ```
 
 4. Configure your `.env.local` file:
+
 ```
 # Supabase
 PUBLIC_SUPABASE_URL=your_supabase_url
@@ -116,15 +120,18 @@ CRON_SECRET=your_cron_secret  # For background sync
 ```
 
 5. Apply database schema:
+
    - If using an existing Supabase project, run the migrations in the SQL editor
    - See `supabase/migrations/` for the schema files
 
 6. Configure Google OAuth in Supabase:
+
    - Go to Authentication → Providers → Google
    - Add your Google OAuth credentials
    - Configure redirect URLs
 
 7. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -143,11 +150,13 @@ Visit `http://localhost:5173` to see your app running!
 ### Deploy to Production
 
 1. Build the application:
+
 ```bash
 npm run build
 ```
 
 2. Deploy to Cloudflare Pages:
+
 ```bash
 npx wrangler pages deploy .svelte-kit/cloudflare
 ```

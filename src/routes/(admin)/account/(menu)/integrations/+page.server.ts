@@ -40,7 +40,10 @@ export const load: PageServerLoad = async ({
     return {
       googleConnected: !!googleToken,
       businessAccounts: null,
-      error: error === "access_denied" ? "Authorization was cancelled" : `OAuth error: ${error}`
+      error:
+        error === "access_denied"
+          ? "Authorization was cancelled"
+          : `OAuth error: ${error}`,
     }
   }
 
@@ -51,7 +54,7 @@ export const load: PageServerLoad = async ({
       return {
         googleConnected: !!googleToken,
         businessAccounts: null,
-        error: "Invalid OAuth state - please try again"
+        error: "Invalid OAuth state - please try again",
       }
     }
 
@@ -60,9 +63,9 @@ export const load: PageServerLoad = async ({
       const gmb = new GoogleMyBusinessWrapper(supabaseServiceRole, {
         clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
         clientSecret: privateEnv.GOOGLE_CLIENT_SECRET,
-        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
+        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY,
       })
-      const redirectUrl = url.origin + '/account/integrations'
+      const redirectUrl = url.origin + "/account/integrations"
       await gmb.handleOAuthCallback(code, orgId, user.id, redirectUrl)
 
       // Clear state cookie
@@ -72,18 +75,26 @@ export const load: PageServerLoad = async ({
       redirect(303, "/account/integrations?success=true")
     } catch (err) {
       // Re-throw redirects (they're not errors)
-      if (err && typeof err === 'object' && 'status' in err && 'location' in err) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "status" in err &&
+        "location" in err
+      ) {
         throw err
       }
-      
+
       console.error("Error exchanging OAuth code:", err)
       // Clear state cookie on error
       cookies.delete("google_oauth_state", { path: "/" })
-      
+
       return {
         googleConnected: !!googleToken,
         businessAccounts: null,
-        error: err instanceof Error ? err.message : "Failed to connect Google account"
+        error:
+          err instanceof Error
+            ? err.message
+            : "Failed to connect Google account",
       }
     }
   }
@@ -91,7 +102,7 @@ export const load: PageServerLoad = async ({
   const gmb = new GoogleMyBusinessWrapper(supabaseServiceRole, {
     clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
     clientSecret: privateEnv.GOOGLE_CLIENT_SECRET,
-    encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
+    encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY,
   })
   const tokenValid = await gmb.hasValidToken(orgId)
   let businessAccounts = null
@@ -99,68 +110,82 @@ export const load: PageServerLoad = async ({
   let invitations = null
   let debugInfo: {
     regularService: {
-      accounts: { success: boolean; data: any; error: string | null };
-      locations: { success: boolean; data: any; error: string | null };
-      invitations: { success: boolean; data: any; error: string | null };
-    };
+      accounts: { success: boolean; data: unknown; error: string | null }
+      locations: { success: boolean; data: unknown; error: string | null }
+      invitations: { success: boolean; data: unknown; error: string | null }
+    }
     altService: {
-      accounts: { success: boolean; data: any; error: string | null };
-      locations: { success: boolean; data: any; error: string | null };
-      invitations: { success: boolean; data: any; error: string | null };
-    };
+      accounts: { success: boolean; data: unknown; error: string | null }
+      locations: { success: boolean; data: unknown; error: string | null }
+      invitations: { success: boolean; data: unknown; error: string | null }
+    }
   } | null = null
-  
+
   // Debug mode to test both services
   if (url.searchParams.get("debug") === "true" && tokenValid) {
-    const { GoogleMyBusinessServiceAlt } = await import("$lib/services/GoogleMyBusinessServiceAlt")
-    
+    const { GoogleMyBusinessServiceAlt } = await import(
+      "$lib/services/GoogleMyBusinessServiceAlt"
+    )
+
     debugInfo = {
       regularService: {
         accounts: { success: false, data: null, error: null },
         locations: { success: false, data: null, error: null },
-        invitations: { success: false, data: null, error: null }
+        invitations: { success: false, data: null, error: null },
       },
       altService: {
         accounts: { success: false, data: null, error: null },
         locations: { success: false, data: null, error: null },
-        invitations: { success: false, data: null, error: null }
-      }
+        invitations: { success: false, data: null, error: null },
+      },
     }
-    
+
     // Test regular service
     try {
       const accounts = await gmb.listAccounts(orgId)
-      debugInfo.regularService.accounts = { success: true, data: accounts, error: null }
+      debugInfo.regularService.accounts = {
+        success: true,
+        data: accounts,
+        error: null,
+      }
     } catch (err) {
-      debugInfo.regularService.accounts = { 
-        success: false, 
-        data: null, 
-        error: err instanceof Error ? err.message : String(err) 
+      debugInfo.regularService.accounts = {
+        success: false,
+        data: null,
+        error: err instanceof Error ? err.message : String(err),
       }
     }
-    
+
     try {
       const locations = await gmb.getAllAccessibleLocations(orgId)
-      debugInfo.regularService.locations = { success: true, data: locations, error: null }
+      debugInfo.regularService.locations = {
+        success: true,
+        data: locations,
+        error: null,
+      }
     } catch (err) {
-      debugInfo.regularService.locations = { 
-        success: false, 
-        data: null, 
-        error: err instanceof Error ? err.message : String(err) 
+      debugInfo.regularService.locations = {
+        success: false,
+        data: null,
+        error: err instanceof Error ? err.message : String(err),
       }
     }
-    
+
     try {
       const invites = await gmb.getInvitations(orgId)
-      debugInfo.regularService.invitations = { success: true, data: invites, error: null }
+      debugInfo.regularService.invitations = {
+        success: true,
+        data: invites,
+        error: null,
+      }
     } catch (err) {
-      debugInfo.regularService.invitations = { 
-        success: false, 
-        data: null, 
-        error: err instanceof Error ? err.message : String(err) 
+      debugInfo.regularService.invitations = {
+        success: false,
+        data: null,
+        error: err instanceof Error ? err.message : String(err),
       }
     }
-    
+
     // Test alternative service with node-fetch
     try {
       // Get the token to use with alt service
@@ -169,63 +194,75 @@ export const load: PageServerLoad = async ({
         .select("access_token, refresh_token")
         .eq("organization_id", orgId)
         .single()
-      
-      if (tokenData) {
+
+      if (tokenData && tokenData.access_token && tokenData.refresh_token) {
         // Import decrypt function from the wrapper since it's not exported from google-my-business
-        const accessToken = gmb['decrypt'](tokenData.access_token)
-        const refreshToken = gmb['decrypt'](tokenData.refresh_token)
-        
+        const accessToken = gmb["decrypt"](tokenData.access_token)
+        const refreshToken = gmb["decrypt"](tokenData.refresh_token)
+
         const altService = new GoogleMyBusinessServiceAlt(
           accessToken,
           refreshToken,
           async (tokens) => {
             // Token refresh callback
-            const encryptedAccessToken = gmb['encrypt'](tokens.access_token)
+            const encryptedAccessToken = gmb["encrypt"](tokens.access_token)
             await supabaseServiceRole
               .from("google_tokens")
               .update({
                 access_token: encryptedAccessToken,
-                expires_at: tokens.expires_at
+                expires_at: tokens.expires_at,
               })
               .eq("organization_id", orgId)
           },
           {
             clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
-            clientSecret: privateEnv.GOOGLE_CLIENT_SECRET
-          }
+            clientSecret: privateEnv.GOOGLE_CLIENT_SECRET,
+          },
         )
-        
+
         // Test alt service methods
         try {
           const accounts = await altService.getAccounts()
-          debugInfo.altService.accounts = { success: true, data: accounts, error: null }
+          debugInfo.altService.accounts = {
+            success: true,
+            data: accounts,
+            error: null,
+          }
         } catch (err) {
-          debugInfo.altService.accounts = { 
-            success: false, 
-            data: null, 
-            error: err instanceof Error ? err.message : String(err) 
+          debugInfo.altService.accounts = {
+            success: false,
+            data: null,
+            error: err instanceof Error ? err.message : String(err),
           }
         }
-        
+
         try {
           const locations = await altService.getAllAccessibleLocations()
-          debugInfo.altService.locations = { success: true, data: locations, error: null }
+          debugInfo.altService.locations = {
+            success: true,
+            data: locations,
+            error: null,
+          }
         } catch (err) {
-          debugInfo.altService.locations = { 
-            success: false, 
-            data: null, 
-            error: err instanceof Error ? err.message : String(err) 
+          debugInfo.altService.locations = {
+            success: false,
+            data: null,
+            error: err instanceof Error ? err.message : String(err),
           }
         }
-        
+
         try {
           const invites = await altService.getInvitations()
-          debugInfo.altService.invitations = { success: true, data: invites, error: null }
+          debugInfo.altService.invitations = {
+            success: true,
+            data: invites,
+            error: null,
+          }
         } catch (err) {
-          debugInfo.altService.invitations = { 
-            success: false, 
-            data: null, 
-            error: err instanceof Error ? err.message : String(err) 
+          debugInfo.altService.invitations = {
+            success: false,
+            data: null,
+            error: err instanceof Error ? err.message : String(err),
           }
         }
       }
@@ -233,7 +270,7 @@ export const load: PageServerLoad = async ({
       console.error("Error testing alt service:", err)
     }
   }
-  
+
   if (tokenValid && !debugInfo) {
     try {
       // Fetch actual business accounts from Google My Business API
@@ -255,7 +292,7 @@ export const load: PageServerLoad = async ({
     invitations,
     success: url.searchParams.get("success") === "true",
     successType: url.searchParams.get("success"), // This will be "true" or "invitation-accepted"
-    debugInfo
+    debugInfo,
   }
 }
 
@@ -273,7 +310,7 @@ export const actions: Actions = {
 
     // Build OAuth URL with the wrapper
     const gmb = new GoogleMyBusinessWrapper(null, {
-      clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID
+      clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
     })
     // Use dynamic redirect URL to support preview deployments
     const url = new URL(request.url)
@@ -300,7 +337,7 @@ export const actions: Actions = {
     // Disconnect using the wrapper (handles revocation)
     try {
       const gmb = new GoogleMyBusinessWrapper(supabaseServiceRole, {
-        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
+        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY,
       })
       await gmb.revokeToken(orgId)
       return { success: true }
@@ -336,10 +373,10 @@ export const actions: Actions = {
       const gmb = new GoogleMyBusinessWrapper(supabaseServiceRole, {
         clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
         clientSecret: privateEnv.GOOGLE_CLIENT_SECRET,
-        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
+        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY,
       })
       const success = await gmb.acceptInvitation(orgId, invitationName)
-      
+
       if (success) {
         redirect(303, "/account/integrations?success=invitation-accepted")
       } else {
@@ -371,29 +408,33 @@ export const actions: Actions = {
     const locationId = formData.get("locationId") as string
     const locationName = formData.get("locationName") as string
 
-    if (!accountId || !locationId) {
-      return fail(400, { error: "Missing account or location information" })
+    if (!locationId) {
+      return fail(400, { error: "Missing location information" })
     }
 
     try {
       const gmb = new GoogleMyBusinessWrapper(supabaseServiceRole, {
         clientId: publicEnv.PUBLIC_GOOGLE_CLIENT_ID,
         clientSecret: privateEnv.GOOGLE_CLIENT_SECRET,
-        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY
+        encryptionKey: privateEnv.TOKEN_ENCRYPTION_KEY,
       })
 
-      // Construct the full location name for the API call
-      const fullLocationName = `accounts/${accountId}/locations/${locationId}`
-      const reviews = await gmb.getReviewsByLocationName(orgId, fullLocationName)
+      // Use the improved getReviews method which handles wildcard fallback
+      // If accountId is '-' or missing, it will use the wildcard approach
+      const reviews = await gmb.getReviews(
+        orgId,
+        accountId || '-',
+        locationId,
+      )
 
       // Helper to convert star rating string to number
       const starRatingToNumber = (rating: string): number => {
         const ratingMap: Record<string, number> = {
-          'ONE': 1,
-          'TWO': 2,
-          'THREE': 3,
-          'FOUR': 4,
-          'FIVE': 5
+          ONE: 1,
+          TWO: 2,
+          THREE: 3,
+          FOUR: 4,
+          FIVE: 5,
         }
         return ratingMap[rating] || 0
       }
@@ -401,30 +442,28 @@ export const actions: Actions = {
       // Store reviews in database
       let importedCount = 0
       for (const review of reviews) {
-        const reviewId = review.reviewId || review.name?.split('/').pop() || ''
-        
-        const { error } = await supabaseServiceRole
-          .from('reviews')
-          .upsert({
-            organization_id: orgId,
-            platform: 'google',
-            platform_review_id: reviewId,
-            location_id: locationId,
-            location_name: locationName || locationId,
-            reviewer_name: review.reviewer?.displayName || 'Anonymous',
-            reviewer_avatar_url: review.reviewer?.profilePhotoUrl,
-            rating: starRatingToNumber(review.starRating),
-            review_text: review.comment,
-            review_reply: review.reviewReply?.comment,
-            reviewed_at: review.createTime,
-            reply_updated_at: review.reviewReply?.updateTime,
-            raw_data: JSON.parse(JSON.stringify(review)) as Json
-          })
+        const reviewId = review.reviewId || review.name?.split("/").pop() || ""
+
+        const { error } = await supabaseServiceRole.from("reviews").upsert({
+          organization_id: orgId,
+          platform: "google",
+          platform_review_id: reviewId,
+          location_id: locationId,
+          location_name: locationName || locationId,
+          reviewer_name: review.reviewer?.displayName || "Anonymous",
+          reviewer_avatar_url: review.reviewer?.profilePhotoUrl,
+          rating: starRatingToNumber(review.starRating),
+          review_text: review.comment,
+          review_reply: review.reviewReply?.comment,
+          reviewed_at: review.createTime,
+          reply_updated_at: review.reviewReply?.updateTime,
+          raw_data: JSON.parse(JSON.stringify(review)) as Json,
+        })
 
         if (!error) {
           importedCount++
         } else {
-          console.error('Error storing review:', error)
+          console.error("Error storing review:", error)
         }
       }
 
@@ -432,7 +471,12 @@ export const actions: Actions = {
       redirect(303, `/account/reviews?imported=${importedCount}`)
     } catch (error) {
       // Re-throw redirects (they're not errors)
-      if (error && typeof error === 'object' && 'status' in error && 'location' in error) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "status" in error &&
+        "location" in error
+      ) {
         throw error
       }
       console.error("Error importing reviews:", error)
