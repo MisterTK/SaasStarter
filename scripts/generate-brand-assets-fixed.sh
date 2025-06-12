@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# AptlySaid Asset Generation Script
+# AptlySaid Asset Generation Script (Fixed Version)
 # This script helps generate various image assets from the SVG logo
 
 echo "AptlySaid Asset Generation"

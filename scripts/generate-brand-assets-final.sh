@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# AptlySaid Asset Generation Script
+# AptlySaid Asset Generation Script (Final Fixed Version)
 # This script helps generate various image assets from the SVG logo
 
 echo "AptlySaid Asset Generation"
@@ -15,6 +15,7 @@ fi
 
 # Create assets directory if it doesn't exist
 mkdir -p static/images/brand
+mkdir -p static/images/temp
 
 # Generate Favicon PNG
 echo "Generating favicon.png..."
@@ -30,12 +31,17 @@ done
 echo "Generating Apple touch icons..."
 magick -density 512 -background "#F8F9FA" static/favicon.svg -resize 180x180 static/apple-touch-icon.png
 
+# Convert SVG logos to PNG for compositing
+echo "Converting SVG logos to PNG for compositing..."
+magick -density 512 -background transparent static/aptlysaid-icon-large.svg -resize 300x300 static/images/temp/icon-large.png
+magick -density 512 -background transparent static/aptlysaid-logo.svg -resize 300x300 static/images/temp/logo.png
+
 # Generate social media assets
 echo "Generating social media assets..."
 
 # Open Graph image (1200x630)
 magick -size 1200x630 xc:"#F8F9FA" \
-    -draw "image over 100,165 300,300 'static/aptlysaid-icon-large.svg'" \
+    static/images/temp/icon-large.png -geometry +100+165 -composite \
     -font "Lora-Bold" -pointsize 72 -fill "#1A2A4F" \
     -annotate +450+315 "AptlySaid" \
     -font "Inter-Regular" -pointsize 36 -fill "#848A96" \
@@ -44,8 +50,12 @@ magick -size 1200x630 xc:"#F8F9FA" \
 
 # Twitter header (1500x500)
 magick -size 1500x500 xc:"#1A2A4F" \
-    -draw "image over 575,100 300,300 'static/aptlysaid-logo.svg'" \
+    static/images/temp/logo.png -geometry +575+100 -composite \
     static/images/brand/twitter-header.png
+
+# Clean up temporary files
+echo "Cleaning up temporary files..."
+rm -rf static/images/temp
 
 echo "Asset generation complete!"
 echo ""

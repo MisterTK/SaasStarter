@@ -1,13 +1,16 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)"
+    ]
+  },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "supabase",
     "github",
     "vercel"
-  ],
-  "permissions": {
-    "allow": [
-      "Bash(git add:*)"
-    ]
-  }
+  ]
 }
