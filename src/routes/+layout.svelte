@@ -13,7 +13,7 @@
   let { children }: Props = $props()
 </script>
 
-<div class="min-h-screen flex flex-col">
+<div class="min-h-screen bg-gray-50 flex flex-col">
   <Header />
   
   {#if $navigating}
@@ -25,12 +25,12 @@
          while slow networks see it moving for a full 12 seconds
     -->
     <div
-      class="fixed w-full top-0 right-0 left-0 h-1 z-50 bg-primary"
+      class="fixed w-full top-0 right-0 left-0 h-1 z-50 bg-primary-600"
       in:slide={{ delay: 100, duration: 12000, axis: "x", easing: expoOut }}
     ></div>
   {/if}
   
-  <main class="flex-1">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
     {@render children?.()}
   </main>
   
