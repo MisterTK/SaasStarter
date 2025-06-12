@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="flex items-center space-x-6 text-sm">
-        <a href="https://r7ai.com" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 font-medium">
+        <a href="https://r7ai.com" target="_blank" rel="noopener noreferrer" class="font-medium hover:opacity-80" style="color: #00aae6;">
           Visit r7ai.com
         </a>
       </div>

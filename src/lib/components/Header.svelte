@@ -9,7 +9,7 @@
         <Logo size="sm" showText={false} />
         <div>
           <h1 class="text-xl font-semibold text-gray-900">WellSaid</h1>
-          <p class="text-xs text-gray-500">Powered by r<span class="text-primary-600">7</span>ai</p>
+          <p class="text-xs text-gray-500">Powered by r<span style="color: #00aae6;">7</span>ai</p>
         </div>
       </a>
       <nav class="flex items-center space-x-4">

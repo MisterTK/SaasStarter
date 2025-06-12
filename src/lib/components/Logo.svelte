@@ -13,14 +13,14 @@
 
 <div class="flex items-center space-x-3">
   <div class="relative {currentSize.container} flex items-center justify-center">
-    <div class="absolute {currentSize.square} bg-primary-600 transform rotate-45"></div>
+    <div class="absolute {currentSize.square} transform rotate-45" style="background-color: #00aae6;"></div>
     <div class="absolute flex items-center justify-center">
       <span class="text-white font-bold {currentSize.text}">r7</span>
     </div>
   </div>
   {#if showText}
     <span class="text-2xl font-light tracking-tight">
-      r<span class="text-primary-600">7</span>ai
+      r<span style="color: #00aae6;">7</span>ai
     </span>
   {/if}
 </div>
