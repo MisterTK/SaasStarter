@@ -3,22 +3,41 @@ name: Format Check
 on: [push, pull_request]
 
 env:
-  PUBLIC_SUPABASE_URL: "https://fake_test_url.supabase.co"
+  # Supabase Configuration
+  PUBLIC_SUPABASE_URL: "https://fake-test-url.supabase.co"
   PUBLIC_SUPABASE_ANON_KEY: "fake_anon_key"
   PRIVATE_SUPABASE_SERVICE_ROLE: "fake_service_role"
-  PRIVATE_STRIPE_API_KEY: "fake_strip_api_key"
+
+  # Google Configuration
+  PUBLIC_GOOGLE_CLIENT_ID: "fake_google_client_id"
+  GOOGLE_CLIENT_SECRET: "fake_google_secret"
+  GOOGLE_CLOUD_PROJECT: "fake_project"
+  GOOGLE_CLOUD_LOCATION: "us-central1"
+
+  # Optional Services
+  PRIVATE_STRIPE_API_KEY: "fake_stripe_api_key"
+  PRIVATE_RESEND_API_KEY: "fake_resend_api_key"
+  PRIVATE_ADMIN_EMAIL: "admin@example.com"
+  CRON_SECRET: "fake_cron_secret"
 
 jobs:
-  build_and_test:
+  format_check:
     name: Code Format Check
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
       - uses: actions/setup-go@v5
 
       - name: NPM install
-        run: npm install
+        run: npm ci
 
       - name: Check Code Format
         run: npm run format_check
@@ -26,5 +45,5 @@ jobs:
       - name: Download go misspell utility
         run: go install github.com/client9/misspell/cmd/misspell@latest
 
-      - name: Run misspell to fine misspelled words
+      - name: Run misspell to find misspelled words
         run: misspell -error ./src README.md
