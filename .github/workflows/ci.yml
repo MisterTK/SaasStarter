@@ -74,5 +74,15 @@ jobs:
       - name: Build application
         run: npm run build
         env:
-          PUBLIC_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
-          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+          # Static fallback values for CI build
+          PUBLIC_SUPABASE_URL: "https://fake-test-url.supabase.co"
+          PUBLIC_SUPABASE_ANON_KEY: "fake_anon_key"
+          PRIVATE_SUPABASE_SERVICE_ROLE: "fake_service_role"
+          GOOGLE_CLOUD_PROJECT: "fake_project"
+          GOOGLE_CLOUD_LOCATION: "us-central1"
+          PUBLIC_GOOGLE_CLIENT_ID: "fake_google_client_id"
+          GOOGLE_CLIENT_SECRET: "fake_google_secret"
+          PRIVATE_STRIPE_API_KEY: "fake_stripe_api_key"
+          PRIVATE_RESEND_API_KEY: "fake_resend_api_key"
+          PRIVATE_ADMIN_EMAIL: "admin@example.com"
+          CRON_SECRET: "fake_cron_secret"
