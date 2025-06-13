@@ -196,7 +196,7 @@
         <div class="card bg-base-200 hover:shadow-lg transition-shadow duration-300">
           <div class="card-body">
             <div class="flex mb-4">
-              {#each Array(testimonial.rating) as _}
+              {#each Array.from({length: testimonial.rating}, (_, i) => i) as i (i)}
                 <svg class="w-5 h-5 text-accent fill-current" viewBox="0 0 20 20">
                   <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                 </svg>

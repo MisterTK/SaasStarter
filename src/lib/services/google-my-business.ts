@@ -233,7 +233,7 @@ export class GoogleMyBusinessService {
     const locations = data.locations || []
 
     // Process locations to ensure they have the expected structure
-    return locations.map((location: any) => {
+    return locations.map((location: Record<string, unknown>) => {
       const identifiers = this.parseLocationName(location.name)
       return {
         name: location.name,

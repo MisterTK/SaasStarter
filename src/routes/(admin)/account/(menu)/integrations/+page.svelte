@@ -359,6 +359,10 @@
             </p>
             <div class="space-y-2">
               {#each data.accessibleLocations as location}
+                {@const locationId = location.name.includes('accounts/') && location.name.includes('locations/') 
+                  ? location.name.split("/")[3] 
+                  : (location.locationId || location.name.replace('locations/', ''))}
+                {@const reviewCount = data.locationReviewCounts?.[locationId] || 0}
                 <div
                   class="flex items-center justify-between p-3 bg-base-200 rounded-lg"
                 >
@@ -381,10 +385,6 @@
                       </div>
                     {/if}
                   </div>
-                  {@const locationId = location.name.includes('accounts/') && location.name.includes('locations/') 
-                    ? location.name.split("/")[3] 
-                    : (location.locationId || location.name.replace('locations/', ''))}
-                  {@const reviewCount = data.locationReviewCounts?.[locationId] || 0}
                   
                   {#if reviewCount > 0}
                     <div class="text-right">

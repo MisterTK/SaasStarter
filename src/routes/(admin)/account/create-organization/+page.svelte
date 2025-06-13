@@ -32,9 +32,9 @@
         class:input-error={form?.errors?.name}
       />
       {#if form?.errors?.name}
-        <label class="label">
+        <div class="label">
           <span class="label-text-alt text-error">{form.errors.name}</span>
-        </label>
+        </div>
       {/if}
     </div>
 
@@ -56,13 +56,13 @@
         />
       </div>
       {#if form?.errors?.slug}
-        <label class="label">
+        <div class="label">
           <span class="label-text-alt text-error">{form.errors.slug}</span>
-        </label>
+        </div>
       {:else}
-        <label class="label">
+        <div class="label">
           <span class="label-text-alt">Letters, numbers, and hyphens only</span>
-        </label>
+        </div>
       {/if}
     </div>
 

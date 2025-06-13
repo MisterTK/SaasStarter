@@ -1,6 +1,5 @@
 <script lang="ts">
   import Logo from './Logo.svelte'
-  import { WebsiteName } from '../../config'
 </script>
 
 <header class="bg-white shadow-sm border-b border-base-300">

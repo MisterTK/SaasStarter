@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { PageData, ActionData } from "./$types"
+  import type { ActionData } from "./$types"
 
-  let { data, form }: { data: PageData; form: ActionData } = $props()
+  let { form }: { form: ActionData } = $props()
 
   let accountId = $state("")
   let locationId = $state("")
@@ -48,11 +48,11 @@
         class="input input-bordered"
         required
       />
-      <label class="label">
+      <div class="label">
         <span class="label-text-alt"
           >Enter the Google My Business account ID (format: accounts/XXXXXXXXX)</span
         >
-      </label>
+      </div>
     </div>
 
     <div class="form-control">
@@ -68,11 +68,11 @@
         class="input input-bordered"
         required
       />
-      <label class="label">
+      <div class="label">
         <span class="label-text-alt"
           >Enter the location ID (format: locations/XXXXXXXXX)</span
         >
-      </label>
+      </div>
     </div>
 
     <button
