@@ -10,3 +10,47 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .mcp.json
 .vercel
+
+# Security-sensitive files - NEVER COMMIT THESE
+*.key
+*.pem
+*.p12
+*.json.key
+service-account*.json
+vertex-ai-key.json
+google-credentials.json
+secrets.json
+*secret*
+*SECRET*
+*password*
+*PASSWORD*
+*token*
+*TOKEN*
+*key*
+*KEY*
+GITHUB_SECRETS.md
+SUPABASE_AUTH_SETUP.md
+*_SECRETS.md
+*-secrets.*
+staging.yml
+*-staging.*
+production.yml
+*-production.*
+.supabase/
+credentials/
+secrets/
+
+# API Keys and sensitive config files
+config/production.json
+config/staging.json
+config/development.json
+.firebase/
+.gcp/
+auth_keys/
+
+# Backup files that might contain sensitive data
+*.bak
+*.backup
+*.sql
+dump.rdb
+*.dump
