@@ -1,5 +1,5 @@
-export const WebsiteName: string = "AptlySaid"
-export const WebsiteBaseUrl: string = "https://aptlysaid.com"
+export const WebsiteName: string = "SaaS Starter"
+export const WebsiteBaseUrl: string = "https://your-saas.com"
 export const WebsiteDescription: string =
-  "Your brand's voice, perfected. AI-powered review response management platform that generates professional, on-brand responses to customer reviews across all platforms."
+  "Production-ready SvelteKit starter with authentication, billing, multi-tenancy, and everything you need to launch your SaaS."
 export const CreateProfileStep: boolean = true

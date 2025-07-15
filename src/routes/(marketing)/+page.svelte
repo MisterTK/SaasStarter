@@ -18,70 +18,70 @@
 
   const features = [
     {
-      name: "AI-Powered Responses",
+      name: "User Authentication",
       description:
-        "Generate professional, personalized responses using advanced AI that learns your brand voice.",
-      icon: "ai",
+        "Secure authentication with Supabase including social login providers.",
+      icon: "auth",
     },
     {
-      name: "Multi-Platform Support",
+      name: "Multi-Tenant Organizations",
       description:
-        "Connect and manage reviews from Google, Yelp, TripAdvisor, Facebook, and more in one dashboard.",
-      icon: "platforms",
+        "Built-in organization management with role-based access control.",
+      icon: "organizations",
     },
     {
-      name: "Smart Analytics",
+      name: "Subscription Management",
       description:
-        "Track response rates, sentiment analysis, and customer satisfaction trends over time.",
-      icon: "analytics",
+        "Integrated Stripe subscriptions with customer portal and billing management.",
+      icon: "billing",
     },
     {
-      name: "Response Templates",
+      name: "Modern Tech Stack",
       description:
-        "Create and customize templates for different review types and scenarios.",
-      icon: "templates",
+        "SvelteKit, TypeScript, Tailwind CSS, and DaisyUI for fast development.",
+      icon: "tech",
     },
     {
-      name: "Team Collaboration",
+      name: "Database Ready",
       description:
-        "Multi-user support with role-based permissions for teams and agencies.",
-      icon: "team",
+        "PostgreSQL with Row Level Security (RLS) policies pre-configured.",
+      icon: "database",
     },
     {
-      name: "Automated Workflows",
+      name: "Email Integration",
       description:
-        "Set up automated responses based on rating, keywords, or customer sentiment.",
-      icon: "automation",
+        "Handlebars templates with Resend API for transactional emails.",
+      icon: "email",
     },
   ]
 
   const testimonials = [
     {
       name: "Sarah Johnson",
-      role: "Marketing Director",
+      role: "CTO",
       company: "TechStart Inc.",
-      quote: "AptlySaid has transformed how we handle customer feedback. What used to take hours now takes minutes, and our responses are more professional than ever.",
+      quote: "This SaaS starter kit saved us months of development time. The authentication and billing integration worked perfectly out of the box.",
       rating: 5,
     },
     {
       name: "Michael Chen",
-      role: "Restaurant Owner",
-      company: "Chen's Bistro",
-      quote: "The AI perfectly captures our friendly, personal tone. Our review response rate has increased by 300% since using AptlySaid.",
+      role: "Founder",
+      company: "Chen's Apps",
+      quote: "The multi-tenant architecture is exactly what we needed. Clean code, great documentation, and excellent developer experience.",
       rating: 5,
     },
     {
       name: "Emily Rodriguez",
-      role: "Customer Success Manager",
+      role: "Lead Developer",
       company: "CloudFlow Solutions",
-      quote: "The multi-platform integration is a game-changer. We manage all our reviews from one place, saving us countless hours each week.",
+      quote: "Modern stack with SvelteKit and TypeScript. The build process is fast and the code is well-organized for scaling.",
       rating: 5,
     },
   ]
 </script>
 
 <svelte:head>
-  <title>{WebsiteName} - Your brand's voice, perfected</title>
+  <title>{WebsiteName} - SaaS Starter Kit</title>
   <meta name="description" content={WebsiteDescription} />
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
   {@html jsonldScript}
@@ -93,11 +93,11 @@
   <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
     <div class="text-center">
       <h1 class="text-5xl md:text-6xl font-serif font-bold text-primary mb-6">
-        Your brand's voice,
-        <span class="text-accent">perfected.</span>
+        Build your SaaS,
+        <span class="text-accent">faster.</span>
       </h1>
       <p class="text-xl text-neutral max-w-3xl mx-auto mb-8">
-        Transform customer reviews into growth opportunities with AI-powered response management that captures your unique brand voice.
+        Production-ready SvelteKit starter with authentication, billing, multi-tenancy, and everything you need to launch your SaaS.
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <a href="/login/sign_up" class="btn btn-accent btn-lg">
@@ -116,10 +116,10 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16">
       <h2 class="text-3xl md:text-4xl font-serif font-bold text-primary mb-4">
-        Everything you need to manage reviews professionally
+        Everything you need to build a successful SaaS
       </h2>
       <p class="text-lg text-neutral max-w-2xl mx-auto">
-        Save time, maintain consistency, and build stronger customer relationships with our comprehensive review management platform.
+        Skip months of boilerplate code and focus on your unique features with our comprehensive starter template.
       </p>
     </div>
     
@@ -144,7 +144,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16">
       <h2 class="text-3xl md:text-4xl font-serif font-bold text-primary mb-4">
-        How AptlySaid Works
+        How It Works
       </h2>
       <p class="text-lg text-neutral max-w-2xl mx-auto">
         Get started in minutes and transform your review management process

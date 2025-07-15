@@ -29,15 +29,12 @@ npm run test_run        # Run tests once
 
 ## Architecture Overview
 
-ReviewAI Pro is a **SvelteKit** application for AI-powered review management with the following architecture:
+This is a **SvelteKit** SaaS starter template with the following architecture:
 
 ### Tech Stack
 
 - **Frontend**: SvelteKit with Svelte 5, TypeScript, Tailwind CSS v4, DaisyUI
 - **Backend**: Supabase (Auth, PostgreSQL with RLS, Storage)
-- **AI Integration**: Google Vertex AI with Vercel AI SDK for streaming
-- **Review Platform**: Google My Business API with OAuth 2.0
-- **Background Jobs**: Vercel Cron or Supabase Edge Functions
 - **Payments**: Stripe (Checkout, Subscriptions, Customer Portal)
 - **Email**: Handlebars templates + Resend API
 - **Search**: Pre-built Fuse.js index generated at build time
@@ -49,13 +46,10 @@ ReviewAI Pro is a **SvelteKit** application for AI-powered review management wit
   - SEO optimized with sitemap.xml and RSS feed
 - `/(admin)/` - Authenticated user area
   - Account dashboard, billing, settings
-  - Reviews management with AI response generation
-  - Google My Business integration
   - Organization management
   - Protected by server-side auth checks
 - `/api/` - API endpoints
-  - Review generation and sync
-  - Cron jobs for background tasks
+  - Health checks and utilities
 
 ### Key Patterns
 
@@ -71,9 +65,6 @@ ReviewAI Pro is a **SvelteKit** application for AI-powered review management wit
 - `profiles` - User profiles with RLS
 - `organizations` - Multi-tenant organization data
 - `organization_members` - User-organization relationships
-- `reviews` - Imported reviews from various platforms
-- `google_tokens` - Encrypted OAuth tokens
-- `service_account_keys` - Vertex AI credentials
 - `stripe_customers` - Payment mapping
 - `contact_requests` - Form submissions
 - Migrations in `supabase/migrations/`
@@ -100,20 +91,10 @@ PUBLIC_SUPABASE_URL
 PUBLIC_SUPABASE_ANON_KEY
 PRIVATE_SUPABASE_SERVICE_ROLE
 
-# Google OAuth (for My Business integration)
-PUBLIC_GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET
-
-# Vertex AI
-GOOGLE_CLOUD_PROJECT
-GOOGLE_CLOUD_LOCATION           # Optional - defaults to us-central1
-GOOGLE_APPLICATION_CREDENTIALS  # Path to service account JSON
-
 # Optional Services
 PRIVATE_STRIPE_API_KEY         # For payments
 PRIVATE_RESEND_API_KEY         # For sending emails
 PRIVATE_ADMIN_EMAIL           # Admin notifications
-CRON_SECRET                   # For background sync authentication
 ```
 
 ## Common Tasks
@@ -131,7 +112,6 @@ CRON_SECRET                   # For background sync authentication
 - Add RLS policies for security
 - Use service role client only in server-side code (+page.server.ts)
 - Organization-scoped queries use `getUserOrganization()` helper
-- Token encryption/decryption handled automatically by services
 
 ### Modifying Subscription Plans
 
@@ -151,40 +131,8 @@ CRON_SECRET                   # For background sync authentication
 - Test card: 4242 4242 4242 4242
 - Webhook testing requires Stripe CLI or live deployment
 
-## Key Integrations
-
-### Google Vertex AI
-
-AI-powered review response generation using Google's Gemini models:
-
-- **Service**: `ResponseGeneratorService` with streaming support
-- **Models**: Configurable in `/src/lib/config/gemini-models.json`
-- **Endpoint**: `POST /api/reviews/generate`
-- **Demo**: `/account/ai-demo` page
-
-### Google My Business
-
-OAuth-based integration for review management:
-
-- **Service**: `GoogleMyBusinessService` with automatic token refresh
-- **Token Storage**: Encrypted in `google_tokens` table
-- **Endpoints**:
-  - `POST /account/api/reviews` - Fetch reviews
-  - `GET /account/api/reviews/sync` - Manual sync
-  - `POST /api/cron/sync-reviews` - Background sync
-
-### Background Sync
-
-Automated review syncing:
-
-- **Vercel Cron**: Configured in `vercel.json`
-- **Schedule**: Every 6 hours (configurable)
-- **Security**: Protected by `CRON_SECRET`
-- **Monitoring**: Returns sync status and statistics
-
 ## Security Patterns
 
 - **Organization Isolation**: All queries scoped to user's organization
-- **Token Encryption**: OAuth tokens encrypted with AES-256-CBC
 - **RLS Policies**: Database-level security for all tables
 - **Service Role**: Background jobs use separate authentication
